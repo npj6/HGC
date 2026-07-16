@@ -19,45 +19,18 @@ class Shuffler {
         random = new Random(seed);
     }
 
-    public ArrayList<Card> shuffleAndDraw(ArrayList<Card> deck, int draws) {
-        int total = 0;
-        for (Card c : deck) {
-            total += c.number;
-        }
+    public int[] shuffleAndDraw(Decklist deck, int draws) {
+        int[] hand = new int[draws];
 
-        TreeSet<Integer> cards = new TreeSet<>();
         for(int i=0; i<draws; i++) {
-            int n = random.nextInt(total-i);
-            for (Integer c : cards) {
-                if (c <= n) {
-                    n++;
+            int n = random.nextInt(deck.list.length-i);
+            int n2 = n;
+            for (int j=0; j<i; j++) {
+                if (hand[j] <= n) {
+                    n2++;
                 }
             }
-            cards.add(n);
-        }
-
-        ArrayList<Card> hand = new ArrayList<>();
-
-        Iterator<Integer> it = cards.iterator();
-        Integer draw = it.next();
-        int acc = 0;
-        int found = 0;
-
-        for (int i=0; i<deck.size(); i++) {
-            //Iterate through and count each draw of this card
-            while(draw != null && draw < acc + deck.get(i).number) {
-                found++;
-                draw = it.hasNext() ? it.next() : null;
-            }
-
-            //If any found, add the card to the hand
-            if (found != 0) {
-                hand.add(new Card(deck.get(i).name, found));
-                found = 0;
-            }
-
-            //Keep track of how many cards we have checked
-            acc += deck.get(i).number;
+            hand[i] = n2;
         }
 
         return hand;
