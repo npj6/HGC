@@ -1,15 +1,14 @@
 package ua.alu;
 
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.TreeSet;
-import java.util.Iterator;
+import java.util.function.BiFunction;
 
 
 //Check efficiency and concurrency
 class Shuffler {
 
-    private Random random;
+    final private Random random;
+
 
     public Shuffler() {
         random = new Random();
@@ -22,7 +21,13 @@ class Shuffler {
     public int[] shuffleAndDraw(Decklist deck, int draws) {
         int[] hand = new int[draws];
 
-        for(int i=0; i<draws; i++) {
+        shuffleAndDraw(deck, hand);
+
+        return hand;
+    }
+
+    public void shuffleAndDraw(Decklist deck, int[] hand) {
+        for(int i=0; i<hand.length; i++) {
             int n = random.nextInt(deck.list.length-i);
             int n2 = n;
             for (int j=0; j<i; j++) {
@@ -32,7 +37,14 @@ class Shuffler {
             }
             hand[i] = n2;
         }
+    }
 
-        return hand;
+    public boolean shuffleDrawAndCheck(Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check) {
+        return check.apply(deck, shuffleAndDraw(deck, draws));
+    }
+
+    public boolean shuffleDrawAndCheck(Decklist deck, int[] hand, BiFunction<Decklist, int[], Boolean> check) {
+        shuffleAndDraw(deck, hand);
+        return check.apply(deck, hand);
     }
 }
