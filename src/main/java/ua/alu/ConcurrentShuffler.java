@@ -9,6 +9,9 @@ import java.util.concurrent.Executors;
 import java.util.Random;
 import java.util.ArrayList;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+
 class ConcurrentShuffler {
 
     final private Random random;
@@ -26,7 +29,7 @@ class ConcurrentShuffler {
             this.draws = draws;
             this.check = check;
             this.workload = workload;
-            System.out.println("Worker creado con workload "+workload);
+            //System.out.println("Worker creado con workload "+workload);
         }
 
         @Override
@@ -51,14 +54,15 @@ class ConcurrentShuffler {
         this.random = new Random(seed);
     }
 
-    public Long shuffleDrawAndCheck(Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check, long hands) {
-        int threads = Runtime.getRuntime().availableProcessors() + 2;
+    public Long shuffleDrawAndCheck(Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check, long hands, Strategy strat) {
+        int threads = strat.threads.get(); //Runtime.getRuntime().availableProcessors();
+        int workerN = strat.workers.get(); //threads * 4;
         ArrayList<FutureTask<Long>> workers = new ArrayList<>();
         
-        for (int i=0; i<threads-1; i++) {
-            workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands/threads)));
+        for (int i=0; i<workerN-1; i++) {
+            workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands/workerN)));
         }
-        workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands - (threads-1)*hands/threads)));
+        workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands - (workerN-1)*(hands/workerN))));
 
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         for (FutureTask<Long> worker : workers) {

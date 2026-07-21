@@ -4,7 +4,6 @@ import java.util.Random;
 import java.util.function.BiFunction;
 
 
-//Check efficiency and concurrency
 class Shuffler {
 
     final private Random random;

@@ -11,14 +11,15 @@ import java.util.regex.Pattern;
 
 import java.util.function.BiFunction;
 
+//Try smaller workers with threadpool managing
 public class App {
     public static void main(String[] args) {
         File file = new File(args[0]);
         Decklist deckList = readDecklist(file);
 
         final int HAND_SIZE = 7;
-        final long HANDS_N = 1000000000L; //mil millones
-        final double MEASURE = 60000000000.0; //minutes
+        final long HANDS_N = 100000000L; //cien millones
+        final double MEASURE = 1000000.0; //ms
         BiFunction<Decklist, int[], Boolean> check = (Decklist d, int[] h) -> {
             boolean r = false;
             for(int i : h) {
@@ -29,37 +30,42 @@ public class App {
             return r;
         };
 
+    
+        Shuffler shuffler = new Shuffler();
+        int hand[] = new int[HAND_SIZE];
+        long total = 0;
 
-        long startTime = System.nanoTime();
-        
-            Shuffler shuffler = new Shuffler();
-            int hand[] = new int[HAND_SIZE];
-            long total = 0;
+        long startTime, endTime, duration;
+    
+        startTime = System.nanoTime();
             for (long i=0; i<HANDS_N; i++) {
                 shuffler.shuffleAndDraw(deckList, hand);
                 if (check.apply(deckList, hand)) {
                     total++;
                 }
             }
+        endTime = System.nanoTime();
 
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-
-        System.out.println("Duration: "+duration/MEASURE);
-        System.out.println("Probability: "+total/(double) HANDS_N);
-        System.out.println();
-
-        startTime = System.nanoTime();
-
-            ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
-            total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N);
-            endTime = System.nanoTime();
-            
         duration = (endTime - startTime);
-
         System.out.println("Duration: "+duration/MEASURE);
         System.out.println("Probability: "+total/(double) HANDS_N);
         System.out.println();
+
+
+        ArrayList<Strategy> strats = new ArrayList<>();
+        strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> 4*Runtime.getRuntime().availableProcessors()));
+        ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
+        for (Strategy strat : strats) {
+            startTime = System.nanoTime();
+                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N, strat);
+            endTime = System.nanoTime();
+                
+            duration = (endTime - startTime);
+            System.out.println("Strategy with "+strat.threads.get()+" threads and "+strat.workers.get()+" workers");
+            System.out.println("Duration: "+duration/MEASURE);
+            System.out.println("Probability: "+total/(double) HANDS_N);
+            System.out.println();
+        }
     }
 
     private static Decklist readDecklist(File file) {
