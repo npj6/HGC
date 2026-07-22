@@ -1,4 +1,4 @@
-package ua.alu;
+package ua.alu.npj6;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

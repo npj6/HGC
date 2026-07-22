@@ -1,4 +1,4 @@
-package ua.alu;
+package ua.alu.npj6;
 
 import java.util.function.BiPredicate;
 import java.util.concurrent.Callable;
