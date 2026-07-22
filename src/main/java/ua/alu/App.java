@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
-//Try smaller workers with threadpool managing
+import java.util.Locale;
+
 public class App {
     public static void main(String[] args) {
         File file = new File(args[0]);
@@ -20,7 +21,7 @@ public class App {
         final int HAND_SIZE = 7;
         final long HANDS_N = 100000000L; //cien millones
         final double MEASURE = 1000000.0; //ms
-        BiFunction<Decklist, int[], Boolean> check = (Decklist d, int[] h) -> {
+        BiPredicate<Decklist, int[]> check = (Decklist d, int[] h) -> {
             boolean r = false;
             for(int i : h) {
                 if (i == 0) {
@@ -30,6 +31,9 @@ public class App {
             return r;
         };
 
+        System.out.println("Testing "+HANDS_N+" hands. Error is smaller than ±"
+            +String.format(Locale.ENGLISH, "%2.4f", estimateError(HANDS_N)*100)+"% with 99% confidence.");
+       
     
         Shuffler shuffler = new Shuffler();
         int hand[] = new int[HAND_SIZE];
@@ -40,19 +44,19 @@ public class App {
         startTime = System.nanoTime();
             for (long i=0; i<HANDS_N; i++) {
                 shuffler.shuffleAndDraw(deckList, hand);
-                if (check.apply(deckList, hand)) {
+                if (check.test(deckList, hand)) {
                     total++;
                 }
             }
         endTime = System.nanoTime();
 
         duration = (endTime - startTime);
-        System.out.println("Duration: "+duration/MEASURE);
-        System.out.println("Probability: "+total/(double) HANDS_N);
+        System.out.println("Duration: "+duration/MEASURE+" ms");
+        System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
         System.out.println();
 
 
-        ArrayList<Strategy> strats = new ArrayList<>();
+        ArrayList<Strategy> strats = new ArrayList<>(); //10* might work better
         strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> 4*Runtime.getRuntime().availableProcessors()));
         ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
         for (Strategy strat : strats) {
@@ -62,8 +66,8 @@ public class App {
                 
             duration = (endTime - startTime);
             System.out.println("Strategy with "+strat.threads.get()+" threads and "+strat.workers.get()+" workers");
-            System.out.println("Duration: "+duration/MEASURE);
-            System.out.println("Probability: "+total/(double) HANDS_N);
+            System.out.println("Duration: "+duration/MEASURE+" ms");
+            System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
             System.out.println();
         }
     }
@@ -91,6 +95,10 @@ public class App {
         }
 
         return new Decklist(cards, list);
+    }
+
+    private static double estimateError(long hands) {
+        return Math.sqrt(2 * Math.log(2/0.01)/(Math.log(2)*hands))/2;
     }
 }
 

@@ -1,43 +1,48 @@
 package ua.alu;
 
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import java.util.Random;
 import java.util.ArrayList;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
+import java.util.concurrent.ThreadLocalRandom;
 
 class ConcurrentShuffler {
 
-    final private Random random;
-
     class WorkerShuffler implements Callable<Long> {
-        final private Shuffler shuffler;
         final private Decklist deck;
         final private int draws;
-        final private BiFunction<Decklist, int[], Boolean> check;
+        final private BiPredicate<Decklist, int[]> check;
         final private long workload;
 
-        public WorkerShuffler(long seed, Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check, long workload) {
-            this.shuffler = new Shuffler(seed);
+        public WorkerShuffler(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long workload) {
             this.deck = deck;
             this.draws = draws;
             this.check = check;
             this.workload = workload;
-            //System.out.println("Worker creado con workload "+workload);
         }
 
         @Override
         public Long call() {
             long count = 0L;
             int[] hand = new int[draws];
-            for(long i=0; i<workload; i++) {
-                if (shuffler.shuffleDrawAndCheck(deck, hand, check)) {
+            int n, n2;
+            for(long l=0; l<workload; l++) {
+                 for(int i=0; i<draws; i++) {
+                    n = ThreadLocalRandom.current().nextInt(deck.list.length-i);
+                    n2 = n;
+                    for (int j=0; j<i; j++) {
+                        if (hand[j] <= n) {
+                            n2++;
+                        }
+                    }
+                    hand[i] = n2;
+                }
+                
+                if (check.test(deck, hand)) {
                     count++;
                 }
             }
@@ -46,23 +51,15 @@ class ConcurrentShuffler {
 
     }
 
-    public ConcurrentShuffler() {
-        this.random = new Random();
-    }
-
-    public ConcurrentShuffler(long seed) {
-        this.random = new Random(seed);
-    }
-
-    public Long shuffleDrawAndCheck(Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check, long hands, Strategy strat) {
-        int threads = strat.threads.get(); //Runtime.getRuntime().availableProcessors();
-        int workerN = strat.workers.get(); //threads * 4;
+    public Long shuffleDrawAndCheck(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long hands, Strategy strat) {
+        int threads = strat.threads.get();
+        int workerN = strat.workers.get();
         ArrayList<FutureTask<Long>> workers = new ArrayList<>();
         
         for (int i=0; i<workerN-1; i++) {
-            workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands/workerN)));
+            workers.add(new FutureTask<>(new WorkerShuffler(deck, draws, check, hands/workerN)));
         }
-        workers.add(new FutureTask<>(new WorkerShuffler(random.nextLong(), deck, draws, check, hands - (workerN-1)*(hands/workerN))));
+        workers.add(new FutureTask<>(new WorkerShuffler(deck, draws, check, hands - (workerN-1)*(hands/workerN))));
 
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         for (FutureTask<Long> worker : workers) {

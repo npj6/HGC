@@ -1,7 +1,7 @@
 package ua.alu;
 
 import java.util.Random;
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 
 
 class Shuffler {
@@ -38,12 +38,12 @@ class Shuffler {
         }
     }
 
-    public boolean shuffleDrawAndCheck(Decklist deck, int draws, BiFunction<Decklist, int[], Boolean> check) {
-        return check.apply(deck, shuffleAndDraw(deck, draws));
+    public boolean shuffleDrawAndCheck(Decklist deck, int draws, BiPredicate<Decklist, int[]> check) {
+        return check.test(deck, shuffleAndDraw(deck, draws));
     }
 
-    public boolean shuffleDrawAndCheck(Decklist deck, int[] hand, BiFunction<Decklist, int[], Boolean> check) {
+    public boolean shuffleDrawAndCheck(Decklist deck, int[] hand, BiPredicate<Decklist, int[]> check) {
         shuffleAndDraw(deck, hand);
-        return check.apply(deck, hand);
+        return check.test(deck, hand);
     }
 }
