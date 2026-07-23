@@ -1,4 +1,4 @@
-package ua.alu.npj6;
+package ua.alu.npj6.shuffler;
 
 import java.util.function.BiPredicate;
 import java.util.concurrent.Callable;
@@ -10,7 +10,9 @@ import java.util.ArrayList;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-class ConcurrentShuffler {
+import ua.alu.npj6.Decklist;
+
+public class ConcurrentShuffler {
 
     class WorkerShuffler implements Callable<Long> {
         final private Decklist deck;

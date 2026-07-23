@@ -9,7 +9,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class Decklist {
+public class Decklist {
     final public String names[];
     final public int list[];
 

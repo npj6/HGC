@@ -8,6 +8,9 @@ import java.util.function.BiPredicate;
 
 import java.util.Locale;
 
+import ua.alu.npj6.shuffler.ConcurrentShuffler;
+import ua.alu.npj6.shuffler.Strategy;
+
 public class App {
     public static void main(String[] args) {
         File file = new File(args[0]);
@@ -29,26 +32,9 @@ public class App {
         System.out.println("Testing "+HANDS_N+" hands. Error is smaller than ±"
             +String.format(Locale.ENGLISH, "%2.4f", estimateError(HANDS_N)*100)+"% with 99% confidence.");
        
-    
-        Shuffler shuffler = new Shuffler();
         int hand[] = new int[HAND_SIZE];
         long total = 0;
-
         long startTime, endTime, duration;
-    
-        startTime = System.nanoTime();
-            for (long i=0; i<HANDS_N; i++) {
-                shuffler.shuffleAndDraw(deckList, hand);
-                if (check.test(deckList, hand)) {
-                    total++;
-                }
-            }
-        endTime = System.nanoTime();
-
-        duration = (endTime - startTime);
-        System.out.println("Duration: "+duration/MEASURE+" ms");
-        System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
-        System.out.println();
 
         ArrayList<Strategy> strats = new ArrayList<>();
         strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> Runtime.getRuntime().availableProcessors()));
