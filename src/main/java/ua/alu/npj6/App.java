@@ -1,13 +1,8 @@
 package ua.alu.npj6;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 import java.util.ArrayList;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import java.util.function.BiPredicate;
 
@@ -16,7 +11,7 @@ import java.util.Locale;
 public class App {
     public static void main(String[] args) {
         File file = new File(args[0]);
-        Decklist deckList = readDecklist(file);
+        Decklist deckList = new Decklist(file);
 
         final int HAND_SIZE = 7;
         final long HANDS_N = 100000000L; //cien millones
@@ -55,9 +50,8 @@ public class App {
         System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
         System.out.println();
 
-        ArrayList<Strategy> strats = new ArrayList<>(); //10* might work better
-        //strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> Runtime.getRuntime().availableProcessors()));
-        strats.add( new Strategy(() -> 4, () -> 16));
+        ArrayList<Strategy> strats = new ArrayList<>();
+        strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> Runtime.getRuntime().availableProcessors()));
         ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
         for (Strategy strat : strats) {
             startTime = System.nanoTime();
@@ -70,54 +64,6 @@ public class App {
             System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
             System.out.println();
         }
-
-
-
-            startTime = System.nanoTime();
-                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N/4, new Strategy(() -> 1, () -> 1));
-            endTime = System.nanoTime();
-                
-            duration = (endTime - startTime);
-            System.out.println("Strategy with 1 threads and 1 workers (quarter hands)");
-            System.out.println("Duration: "+duration/MEASURE+" ms");
-            System.out.println("Probability: "+100*total/(double) (HANDS_N/4)+"%");
-            System.out.println();
-
-            
-            startTime = System.nanoTime();
-                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N/2, new Strategy(() -> 2, () -> 2));
-            endTime = System.nanoTime();
-                
-            duration = (endTime - startTime);
-            System.out.println("Strategy with 2 threads and 2 workers (quarter hands)");
-            System.out.println("Duration: "+duration/MEASURE+" ms");
-            System.out.println("Probability: "+100*total/(double) (HANDS_N/2)+"%");
-            System.out.println();
-    }
-
-    private static Decklist readDecklist(File file) {
-        ArrayList<String> cards = new ArrayList<>();
-        ArrayList<Integer> list = new ArrayList<>();
-
-        try (Scanner sc = new Scanner(file)) {
-            Pattern card = Pattern.compile("^\\s*(\\d+)\\s*x\\s*(.*\\S)\\s*$");
-            Matcher matcher;
-            while (sc.hasNextLine()) {
-                String data = sc.nextLine();
-                matcher = card.matcher(data);
-                if (matcher.find()) {
-                    cards.add(matcher.group(2));
-                    for (int i=0; i<Integer.parseInt(matcher.group(1)); i++) {
-                        list.add(cards.size()-1);
-                    }
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-
-        return new Decklist(cards, list);
     }
 
     private static double estimateError(long hands) {

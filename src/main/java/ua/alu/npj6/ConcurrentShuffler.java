@@ -65,7 +65,11 @@ class ConcurrentShuffler {
         }
         workers.add(new FutureTask<>(new WorkerShuffler(deck, draws, check, hands - (workerN-1)*(hands/workerN))));
 
-        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        ExecutorService executor = Executors.newFixedThreadPool(threads, (Runnable r) -> {
+            Thread t = new Thread(r);
+            t.setPriority(Thread.MAX_PRIORITY);
+            return t;
+        });
         for (FutureTask<Long> worker : workers) {
             executor.execute(worker);
         }
