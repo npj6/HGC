@@ -25,24 +25,28 @@ class ConcurrentShuffler {
             this.workload = workload;
         }
 
+        //works better if you split the call function in two
+        private boolean shuffleDrawAndCheck(int [] hand) {
+            int n, n2;
+            for(int i=0; i<draws; i++) {
+                n = ThreadLocalRandom.current().nextInt(deck.list.length-i);
+                n2 = n;
+                for (int j=0; j<i; j++) {
+                    if (hand[j] <= n) {
+                        n2++;
+                    }
+                }
+                hand[i] = n2;
+            }
+            return check.test(deck, hand);
+        }
+
         @Override
         public Long call() {
             long count = 0L;
             int[] hand = new int[draws];
-            int n, n2;
             for(long l=0; l<workload; l++) {
-                 for(int i=0; i<draws; i++) {
-                    n = ThreadLocalRandom.current().nextInt(deck.list.length-i);
-                    n2 = n;
-                    for (int j=0; j<i; j++) {
-                        if (hand[j] <= n) {
-                            n2++;
-                        }
-                    }
-                    hand[i] = n2;
-                }
-                
-                if (check.test(deck, hand)) {
+                if (shuffleDrawAndCheck(hand)) {
                     count++;
                 }
             }
@@ -51,7 +55,7 @@ class ConcurrentShuffler {
 
     }
 
-    public Long shuffleDrawAndCheck(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long hands, Strategy strat) {
+    public long shuffleDrawAndCheck(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long hands, Strategy strat) {
         int threads = strat.threads.get();
         int workerN = strat.workers.get();
         ArrayList<FutureTask<Long>> workers = new ArrayList<>();

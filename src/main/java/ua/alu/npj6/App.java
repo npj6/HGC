@@ -21,9 +21,9 @@ public class App {
         final int HAND_SIZE = 7;
         final long HANDS_N = 100000000L; //cien millones
         final double MEASURE = 1000000.0; //ms
-        BiPredicate<Decklist, int[]> check = (Decklist d, int[] h) -> {
+        BiPredicate<Decklist, int[]> check = (Decklist deck, int[] hand) -> {
             boolean r = false;
-            for(int i : h) {
+            for(int i : hand) {
                 if (i == 0) {
                     r = true;
                 }
@@ -55,9 +55,9 @@ public class App {
         System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
         System.out.println();
 
-
         ArrayList<Strategy> strats = new ArrayList<>(); //10* might work better
-        strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> 4*Runtime.getRuntime().availableProcessors()));
+        //strats.add( new Strategy(() -> Runtime.getRuntime().availableProcessors(), () -> Runtime.getRuntime().availableProcessors()));
+        strats.add( new Strategy(() -> 4, () -> 16));
         ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
         for (Strategy strat : strats) {
             startTime = System.nanoTime();
@@ -70,6 +70,29 @@ public class App {
             System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
             System.out.println();
         }
+
+
+
+            startTime = System.nanoTime();
+                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N/4, new Strategy(() -> 1, () -> 1));
+            endTime = System.nanoTime();
+                
+            duration = (endTime - startTime);
+            System.out.println("Strategy with 1 threads and 1 workers (quarter hands)");
+            System.out.println("Duration: "+duration/MEASURE+" ms");
+            System.out.println("Probability: "+100*total/(double) (HANDS_N/4)+"%");
+            System.out.println();
+
+            
+            startTime = System.nanoTime();
+                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N/2, new Strategy(() -> 2, () -> 2));
+            endTime = System.nanoTime();
+                
+            duration = (endTime - startTime);
+            System.out.println("Strategy with 2 threads and 2 workers (quarter hands)");
+            System.out.println("Duration: "+duration/MEASURE+" ms");
+            System.out.println("Probability: "+100*total/(double) (HANDS_N/2)+"%");
+            System.out.println();
     }
 
     private static Decklist readDecklist(File file) {
