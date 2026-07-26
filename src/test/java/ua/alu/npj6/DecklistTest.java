@@ -17,16 +17,15 @@ public class DecklistTest {
         File deckfile;
 
         URL resource = assertDoesNotThrow(() -> getClass().getClassLoader().getResource("test.dck"));
-        // = getClass().getClassLoader().getResource("test.dck");
         assertNotNull(resource);
 
         deckfile = new File(resource.toURI());
-        Decklist deck = new Decklist(deckfile);
+        Decklist SUT = new Decklist(deckfile);
         
         String names[] = new String[]{"A", "BBB", "C C C", "DD DD DD"};
         int list[] = new int[]{0, 1, 1, 2, 2, 2, 3, 3, 3, 3};
 
-        assertArrayEquals(names, deck.names);
-        assertArrayEquals(list, deck.list);
+        assertArrayEquals(names, SUT.names);
+        assertArrayEquals(list, SUT.list);
     }
 }

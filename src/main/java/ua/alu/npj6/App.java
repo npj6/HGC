@@ -17,7 +17,7 @@ public class App {
         Decklist deckList = new Decklist(file);
 
         final int HAND_SIZE = 7;
-        final long HANDS_N = 100000000L; //cien millones
+        final long HANDS_N = 1000000000L; //mil millones
         final double MEASURE = 1000000.0; //ms
         BiPredicate<Decklist, int[]> check = (Decklist deck, int[] hand) -> {
             boolean r = false;
