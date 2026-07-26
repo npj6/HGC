@@ -14,7 +14,7 @@ import ua.alu.npj6.utils.NextInt;
 public class ConcurrentShufflerTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4, 6})
-    public void workerTest(int threads) {
+    public void workerNumberTest(int threads) {
         ConcurrentShuffler SUT = new ConcurrentShuffler();
         AtomicInteger counter = new AtomicInteger(); 
         WorkerShufflerFactory factory = new WorkerShufflerFactory() {

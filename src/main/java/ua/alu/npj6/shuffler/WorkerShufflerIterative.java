@@ -33,17 +33,16 @@ class WorkerShufflerIterative implements Callable<Long> {
     }
 
     //works better if you split the call function in two
-    private boolean shuffleDrawAndCheck(int [] hand) {
-        int n, n2;
+    boolean shuffleDrawAndCheck(int [] hand) {
+        int n;
         for(int i=0; i<draws; i++) {
             n = nextInt.get(deck.list.length-i);
-            n2 = n;
             for (int j=0; j<i; j++) {
                 if (hand[j] <= n) {
-                    n2++;
+                    n++;
                 }
             }
-            hand[i] = n2;
+            hand[i] = n;
         }
         return check.test(deck, hand);
     }
