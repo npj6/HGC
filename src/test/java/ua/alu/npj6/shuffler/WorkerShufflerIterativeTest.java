@@ -45,11 +45,13 @@ public class WorkerShufflerIterativeTest {
     @ParameterizedTest
     @MethodSource("arrayProvider")
     public void shuffleDrawAndCheckTest(List<Integer> source) {
-        int hand[] = new int[7];
+        int handSize = 7;
+        int hand[] = new int[handSize];
+        int order[] = new int[handSize+1];
         Decklist deck = new Decklist(new ArrayList<>(), new ArrayList<>());
         WorkerShufflerIterative SUT = new WorkerShufflerIterative(
             deck,
-            hand.length,
+            handSize,
             (Decklist d, int[] h) -> { assertSame(deck, d); assertSame(hand, h); return true; },
             0,
             new NextInt() {
@@ -60,8 +62,8 @@ public class WorkerShufflerIterativeTest {
                 }
             }
         );
-        assertEquals(true, SUT.shuffleDrawAndCheck(hand));
-        for (int i=0; i<hand.length; i++) {
+        assertEquals(true, SUT.shuffleDrawAndCheck(hand, order));
+        for (int i=0; i<handSize; i++) {
             int val = i; //i is not final, lambda needs final
             assertTrue(Arrays.stream(hand).anyMatch(x -> x == val));
         }
