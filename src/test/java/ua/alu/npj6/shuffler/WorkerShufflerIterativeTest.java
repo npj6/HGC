@@ -29,7 +29,7 @@ public class WorkerShufflerIterativeTest {
     };
 
     @Test
-    public void callTest() {
+    public void callNumberTest() {
         long workload = 10;
         mockBiPredicate check = new mockBiPredicate();
         WorkerShufflerIterative SUT = new WorkerShufflerIterative(
@@ -46,14 +46,19 @@ public class WorkerShufflerIterativeTest {
     @MethodSource("arrayProvider")
     public void shuffleDrawAndCheckTest(List<Integer> source) {
         int handSize = 7;
-        int hand[] = new int[handSize];
-        int order[] = new int[handSize+1];
         Decklist deck = new Decklist(new ArrayList<>(), new ArrayList<>());
         WorkerShufflerIterative SUT = new WorkerShufflerIterative(
             deck,
             handSize,
-            (Decklist d, int[] h) -> { assertSame(deck, d); assertSame(hand, h); return true; },
-            0,
+            (Decklist d, int[] h) -> {
+                assertSame(deck, d);
+                for (int i=0; i<handSize; i++) {
+                    int val = i; //i is not final, lambda needs final
+                    assertTrue(Arrays.stream(h).anyMatch(x -> x == val));
+                }
+                return true;
+            },
+            1,
             new NextInt() {
                 int counter = 0;
 
@@ -62,11 +67,7 @@ public class WorkerShufflerIterativeTest {
                 }
             }
         );
-        assertEquals(true, SUT.shuffleDrawAndCheck(hand, order));
-        for (int i=0; i<handSize; i++) {
-            int val = i; //i is not final, lambda needs final
-            assertTrue(Arrays.stream(hand).anyMatch(x -> x == val));
-        }
+        assertEquals(1, SUT.call());
     }
 
     //Asumes the random next int will be chosen from 0 to number of unchosen cards

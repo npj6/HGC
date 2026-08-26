@@ -34,35 +34,20 @@ class WorkerShufflerIterative implements Callable<Long> {
         this.nextInt = nextInt;
     }
 
-    //works better if you split the call function in two
-    boolean shuffleDrawAndCheck(int [] hand, int order[]) {
-        int n;
-        order[hand.length] = -1;
-        for(int i=0; i<draws; i++) {
-            n = nextInt.get(deck.list.length-i);
-            int idx = hand.length;
-            int lastIdx = -1;
-            do {
-                if (order[idx] == -1) {
-                    //last item of list
-                    order[i] = -1;
-                    order[idx] = i;
-                    break;
-                } else if (hand[order[idx]] <= n) {
-                    //item leq
-                    n++;
-                } else {
-                    //item grt
-                    order[i] = order[idx];
-                    order[idx] = i;
-                    break;
-                }
-                lastIdx = idx;
-                idx = order[idx];
-            } while (true);
-            hand[i] = n;
+    int orderInsertionAndDisplacement(int [] hand, int order[], int i, int n) {
+        int idx = hand.length;
+        int lastIdx = -1;
+        while (order[idx] != -1 && hand[order[idx]] <= n) {
+            //item leq: continue iterating
+            n++;
+            lastIdx = idx;
+            idx = order[idx];
         }
-        return check.test(deck, hand);
+        
+        //last item of list || item grt: insert and end
+        order[i] = order[idx];
+        order[idx] = i;
+        return n;
     }
 
     @Override
@@ -70,10 +55,12 @@ class WorkerShufflerIterative implements Callable<Long> {
         long count = 0L;
         int[] hand = new int[draws];
         int[] order = new int[draws+1];
-        for(long l=0; l<workload; l++) {
-            if (shuffleDrawAndCheck(hand, order)) {
-                count++;
+        for(long l=0L; l<workload; l++) {
+            order[hand.length] = -1;
+            for(int i=0; i<draws; i++) {
+                hand[i] = orderInsertionAndDisplacement(hand, order, i, nextInt.get(deck.list.length-i));
             }
+            if (check.test(deck, hand)) {count++;}
         }
         return count;
     }
