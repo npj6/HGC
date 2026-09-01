@@ -11,10 +11,25 @@ import java.util.Locale;
 import ua.alu.npj6.shuffler.ConcurrentShuffler;
 import ua.alu.npj6.shuffler.Strategy;
 
+import ua.alu.npj6.parser.HGCParser;
+
 public class App {
+    static void ANTLR4Test(Decklist decklist) {
+       HGCParser parser = HGCParser.getParser("src\\test\\resources\\test.hnd", decklist);
+
+       if (parser.successful) {
+            System.out.println("Parsing successful");
+       } else {
+            System.out.println("Parsing unsuccessful");
+       }
+    }
+
     public static void main(String[] args) {
         File file = new File(args[0]);
-        Decklist deckList = new Decklist(file);
+        Decklist decklist = new Decklist(file);
+
+        ANTLR4Test(decklist);
+        /*
 
         final int HAND_SIZE = 7;
         final long HANDS_N = 100000000L; //cien millones
@@ -41,7 +56,7 @@ public class App {
         ConcurrentShuffler shuffler2 = new ConcurrentShuffler();
         for (Strategy strat : strats) {
             startTime = System.nanoTime();
-                total = shuffler2.shuffleDrawAndCheck(deckList, HAND_SIZE, check, HANDS_N, strat);
+                total = shuffler2.shuffleDrawAndCheck(decklist, HAND_SIZE, check, HANDS_N, strat);
             endTime = System.nanoTime();
                 
             duration = (endTime - startTime);
@@ -50,6 +65,7 @@ public class App {
             System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
             System.out.println();
         }
+        */
     }
 
     private static double estimateError(long hands) {

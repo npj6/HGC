@@ -22,7 +22,7 @@ public class DecklistTest {
         deckfile = new File(resource.toURI());
         Decklist SUT = new Decklist(deckfile);
         
-        String names[] = new String[]{"A", "BBB", "C C C", "DD DD DD"};
+        String names[] = new String[]{"A", "B", "C", "D"};
         int list[] = new int[]{0, 1, 1, 2, 2, 2, 3, 3, 3, 3};
 
         assertArrayEquals(names, SUT.names);
