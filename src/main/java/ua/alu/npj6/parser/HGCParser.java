@@ -26,11 +26,7 @@ public class HGCParser {
     ParserContext parserContext = null;
     HandFile handFile = null;
 
-    public static HGCParser getParser(String handfile, Decklist decklist) {
-        return new HGCParser(handfile, decklist);
-    }
-
-    private HGCParser(String handfile, Decklist decklist) {
+    public HGCParser(String handfile, Decklist decklist) {
         try  {
             PredicateLexer lexer = new PredicateLexer(CharStreams.fromFileName(handfile));
             lexer.addErrorListener(ThrowingErrorListener.INSTANCE);

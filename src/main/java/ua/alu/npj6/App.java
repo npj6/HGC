@@ -15,7 +15,7 @@ import ua.alu.npj6.parser.HGCParser;
 
 public class App {
     static void ANTLR4Test(Decklist decklist) {
-       HGCParser parser = HGCParser.getParser("src\\test\\resources\\test.hnd", decklist);
+       HGCParser parser = new HGCParser("src\\test\\resources\\test.hnd", decklist);
 
        if (parser.successful) {
             System.out.println("Parsing successful");
