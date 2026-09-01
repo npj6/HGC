@@ -1,6 +1,7 @@
 package ua.alu.npj6.parser.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Expression {
     Condition condition = null;
@@ -25,6 +26,20 @@ public class Expression {
 
     public String operation() {
         return this.operation;
+    }
+
+    public Expression canonicalForm() {
+        if (condition != null ) {
+            return new Expression(condition.canonicalForm(), draws);
+        } else if (this.expressions != null) {
+            ArrayList<Expression> expressions = new ArrayList<>();
+            for (Expression expr : this.expressions) {
+                expressions.add(expr.canonicalForm());
+            }
+            return new Expression(expressions, operation);
+        } else {
+            return null;
+        }
     }
 
     @Override

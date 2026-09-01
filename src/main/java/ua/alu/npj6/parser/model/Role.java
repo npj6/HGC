@@ -1,6 +1,7 @@
 package ua.alu.npj6.parser.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Role {
     List<String> names;
@@ -11,6 +12,16 @@ public class Role {
 
     public List<String> names() {
         return names;
+    }
+
+    public Role canonicalForm() {
+        ArrayList<String> names = new ArrayList<>();
+
+        for (String n : this.names) {
+            names.add(n);
+        }
+
+        return new Role(names);
     }
 
     @Override

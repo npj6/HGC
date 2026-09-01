@@ -43,6 +43,8 @@ public class HGCParser {
         try {
             handFile = handFileVisitor.visit(parser.handFile());
             System.out.println(handFile);
+            System.out.println("Canonical Form");
+            System.out.println(handFile.canonicalForm());
         } catch (ParseCancellationException e) {
             successful = false;
             System.out.println("[ERROR] Parsing of hand file ended unexpectedly");

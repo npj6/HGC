@@ -11,6 +11,10 @@ public class Restriction {
         this.quantity = quantity;
     }
 
+    public Restriction canonicalForm() {
+        return new Restriction(role.canonicalForm(), exact, quantity);
+    }
+
     @Override
     public String toString() {
         return role.toString()+(exact?"!x":"x")+Integer.toString(quantity);

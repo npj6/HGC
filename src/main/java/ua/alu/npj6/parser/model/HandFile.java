@@ -1,6 +1,7 @@
 package ua.alu.npj6.parser.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class HandFile {
     List<String> names;
@@ -9,6 +10,26 @@ public class HandFile {
     public HandFile(List<String> names, List<Expression> expressions) {
         this.names = names;
         this.expressions = expressions;
+    }
+
+    public HandFile canonicalForm() {
+        ArrayList<String> names = new ArrayList<>();
+        ArrayList<Expression> expressions = new ArrayList<>();
+
+        for (int i=0; i<this.names.size(); i++) {
+            String name = this.names.get(i);
+            Expression expr = this.expressions.get(i);
+            
+            int idx = names.indexOf(name);
+            if (idx == -1) {
+                names.add(name);
+                expressions.add(expr.canonicalForm());
+            } else {
+                expressions.set(idx, expr.canonicalForm());
+            }
+        }
+
+        return new HandFile(names, expressions);
     }
 
     @Override

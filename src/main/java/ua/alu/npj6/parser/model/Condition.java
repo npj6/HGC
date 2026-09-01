@@ -1,6 +1,7 @@
 package ua.alu.npj6.parser.model;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class Condition {
     Restriction restriction = null;
@@ -23,6 +24,22 @@ public class Condition {
 
     public String operation() {
         return this.operation;
+    }
+
+    public Condition canonicalForm() {
+        if (restriction != null) {
+            return new Condition(restriction.canonicalForm());
+        } else if (this.conditions != null) {
+            ArrayList<Condition> conditions = new ArrayList<>();
+
+            for (Condition cond : this.conditions) {
+                conditions.add(cond.canonicalForm());
+            }
+
+            return new Condition(conditions, operation);
+        }  else {
+            return null;
+        }
     }
 
     @Override
