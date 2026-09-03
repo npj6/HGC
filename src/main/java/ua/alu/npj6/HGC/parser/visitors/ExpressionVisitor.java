@@ -1,16 +1,16 @@
-package ua.alu.npj6.parser.visitors;
+package ua.alu.npj6.HGC.parser.visitors;
 
 import java.util.ArrayList;
 
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Expression;
-import ua.alu.npj6.parser.model.Condition;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Expression;
+import ua.alu.npj6.HGC.parser.model.Condition;
 
-import ua.alu.npj6.parser.PredicateBaseVisitor;
-import ua.alu.npj6.parser.PredicateParser.SimpleExprContext;
-import ua.alu.npj6.parser.PredicateParser.AndExprContext;
-import ua.alu.npj6.parser.PredicateParser.OrExprContext;
-import ua.alu.npj6.parser.PredicateParser.PExprContext;
+import ua.alu.npj6.HGC.parser.PredicateBaseVisitor;
+import ua.alu.npj6.HGC.parser.PredicateParser.SimpleExprContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.AndExprContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.OrExprContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.PExprContext;
 
 public class ExpressionVisitor extends PredicateBaseVisitor<Expression> {
     ConditionVisitor conditionVisitor;

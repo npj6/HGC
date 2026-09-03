@@ -1,4 +1,4 @@
-package ua.alu.npj6;
+package ua.alu.npj6.HGC;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

@@ -1,13 +1,13 @@
-package ua.alu.npj6.parser.visitors;
+package ua.alu.npj6.HGC.parser.visitors;
 
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Restriction;
-import ua.alu.npj6.parser.model.Role;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Restriction;
+import ua.alu.npj6.HGC.parser.model.Role;
 
-import ua.alu.npj6.parser.PredicateBaseVisitor;
-import ua.alu.npj6.parser.PredicateParser.SimpleRestrictContext;
-import ua.alu.npj6.parser.PredicateParser.TimesRestrictContext;
-import ua.alu.npj6.parser.PredicateParser.ExactRestrictContext;
+import ua.alu.npj6.HGC.parser.PredicateBaseVisitor;
+import ua.alu.npj6.HGC.parser.PredicateParser.SimpleRestrictContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.TimesRestrictContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.ExactRestrictContext;
 
 public class RestrictionVisitor extends PredicateBaseVisitor<Restriction> {
     RoleVisitor roleVisitor;

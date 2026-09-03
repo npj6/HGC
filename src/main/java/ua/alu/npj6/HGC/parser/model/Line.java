@@ -1,4 +1,4 @@
-package ua.alu.npj6.parser.model;
+package ua.alu.npj6.HGC.parser.model;
 
 public class Line {
     public String name;

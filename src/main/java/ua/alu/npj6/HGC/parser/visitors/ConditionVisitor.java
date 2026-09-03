@@ -1,17 +1,17 @@
-package ua.alu.npj6.parser.visitors;
+package ua.alu.npj6.HGC.parser.visitors;
 
 import java.util.ArrayList;
 
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Condition;
-import ua.alu.npj6.parser.model.Restriction;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Condition;
+import ua.alu.npj6.HGC.parser.model.Restriction;
 
-import ua.alu.npj6.parser.PredicateBaseVisitor;
-import ua.alu.npj6.parser.PredicateParser.SimpleCondContext;
-import ua.alu.npj6.parser.PredicateParser.AndCondContext;
-import ua.alu.npj6.parser.PredicateParser.XAndCondContext;
-import ua.alu.npj6.parser.PredicateParser.OrCondContext;
-import ua.alu.npj6.parser.PredicateParser.PCondContext;
+import ua.alu.npj6.HGC.parser.PredicateBaseVisitor;
+import ua.alu.npj6.HGC.parser.PredicateParser.SimpleCondContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.AndCondContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.XAndCondContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.OrCondContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.PCondContext;
 
 public class ConditionVisitor extends PredicateBaseVisitor<Condition> {
     RestrictionVisitor restrictionVisitor;

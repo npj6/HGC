@@ -1,11 +1,11 @@
-package ua.alu.npj6.shuffler;
+package ua.alu.npj6.HGC.shuffler;
 
 
 import java.util.function.BiPredicate;
 import java.util.concurrent.Callable;
 
-import ua.alu.npj6.Decklist;
-import ua.alu.npj6.utils.NextInt;
+import ua.alu.npj6.HGC.Decklist;
+import ua.alu.npj6.HGC.utils.NextInt;
 
 interface WorkerShufflerFactory {
 

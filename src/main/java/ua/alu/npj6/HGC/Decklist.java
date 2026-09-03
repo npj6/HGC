@@ -1,4 +1,4 @@
-package ua.alu.npj6;
+package ua.alu.npj6.HGC;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package ua.alu.npj6.shuffler;
+package ua.alu.npj6.HGC.shuffler;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import ua.alu.npj6.Decklist;
-import ua.alu.npj6.utils.NextInt;
+import ua.alu.npj6.HGC.Decklist;
+import ua.alu.npj6.HGC.utils.NextInt;
 
 public class WorkerShufflerIterativeTest {
 

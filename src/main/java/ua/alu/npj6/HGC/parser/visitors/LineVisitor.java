@@ -1,11 +1,11 @@
-package ua.alu.npj6.parser.visitors;
+package ua.alu.npj6.HGC.parser.visitors;
 
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Line;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Line;
 
-import ua.alu.npj6.parser.PredicateBaseVisitor;
-import ua.alu.npj6.parser.PredicateParser.HandLineContext;
-import ua.alu.npj6.parser.PredicateParser.RoleLineContext;
+import ua.alu.npj6.HGC.parser.PredicateBaseVisitor;
+import ua.alu.npj6.HGC.parser.PredicateParser.HandLineContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.RoleLineContext;
 
 public class LineVisitor extends PredicateBaseVisitor<Line> {
     RoleVisitor roleVisitor;

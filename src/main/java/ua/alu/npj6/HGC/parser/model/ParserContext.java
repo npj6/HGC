@@ -1,8 +1,8 @@
-package ua.alu.npj6.parser.model;
+package ua.alu.npj6.HGC.parser.model;
 
 import java.util.ArrayList;
 
-import ua.alu.npj6.Decklist;
+import ua.alu.npj6.HGC.Decklist;
 
 public class ParserContext {
     public ArrayList<String> roleNames;

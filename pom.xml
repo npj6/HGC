@@ -86,7 +86,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>ua.alu.npj6.App</mainClass>
+              <mainClass>ua.alu.npj6.HGC.App</mainClass>
             </manifest>
           </archive>
         </configuration>

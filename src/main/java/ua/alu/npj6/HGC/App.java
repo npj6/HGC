@@ -1,4 +1,4 @@
-package ua.alu.npj6;
+package ua.alu.npj6.HGC;
 
 import java.io.File;
 
@@ -8,10 +8,10 @@ import java.util.function.BiPredicate;
 
 import java.util.Locale;
 
-import ua.alu.npj6.shuffler.ConcurrentShuffler;
-import ua.alu.npj6.shuffler.Strategy;
+import ua.alu.npj6.HGC.shuffler.ConcurrentShuffler;
+import ua.alu.npj6.HGC.shuffler.Strategy;
 
-import ua.alu.npj6.parser.HGCParser;
+import ua.alu.npj6.HGC.parser.HGCParser;
 
 public class App {
     static void ANTLR4Test(Decklist decklist, int hand) {

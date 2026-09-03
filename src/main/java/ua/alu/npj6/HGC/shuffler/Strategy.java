@@ -1,4 +1,4 @@
-package ua.alu.npj6.shuffler;
+package ua.alu.npj6.HGC.shuffler;
 
 import java.util.function.Supplier;
 

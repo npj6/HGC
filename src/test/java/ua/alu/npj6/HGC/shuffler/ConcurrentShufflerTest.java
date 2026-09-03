@@ -1,4 +1,4 @@
-package ua.alu.npj6.shuffler;
+package ua.alu.npj6.HGC.shuffler;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
 import java.util.concurrent.Callable;
 
-import ua.alu.npj6.Decklist;
-import ua.alu.npj6.utils.NextInt;
+import ua.alu.npj6.HGC.Decklist;
+import ua.alu.npj6.HGC.utils.NextInt;
 
 public class ConcurrentShufflerTest {
     @ParameterizedTest

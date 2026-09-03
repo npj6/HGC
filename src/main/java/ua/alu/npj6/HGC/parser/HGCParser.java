@@ -1,23 +1,23 @@
-package ua.alu.npj6.parser;
+package ua.alu.npj6.HGC.parser;
 
 import org.antlr.v4.runtime.CharStreams;
-import ua.alu.npj6.parser.PredicateLexer;
+import ua.alu.npj6.HGC.parser.PredicateLexer;
 import org.antlr.v4.runtime.CommonTokenStream;
-import ua.alu.npj6.parser.PredicateParser;
+import ua.alu.npj6.HGC.parser.PredicateParser;
 
 import java.io.IOException;
 
-import ua.alu.npj6.parser.visitors.HandFileVisitor;
-import ua.alu.npj6.parser.model.HandFile;
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Expression;
+import ua.alu.npj6.HGC.parser.visitors.HandFileVisitor;
+import ua.alu.npj6.HGC.parser.model.HandFile;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Expression;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.RecognitionException;
 
-import ua.alu.npj6.Decklist;
+import ua.alu.npj6.HGC.Decklist;
 
 public class HGCParser {
 

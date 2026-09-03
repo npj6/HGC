@@ -1,13 +1,13 @@
-package ua.alu.npj6.parser.visitors;
+package ua.alu.npj6.HGC.parser.visitors;
 
 import java.util.ArrayList;
 
-import ua.alu.npj6.parser.model.ParserContext;
-import ua.alu.npj6.parser.model.Role;
+import ua.alu.npj6.HGC.parser.model.ParserContext;
+import ua.alu.npj6.HGC.parser.model.Role;
 
-import ua.alu.npj6.parser.PredicateBaseVisitor;
-import ua.alu.npj6.parser.PredicateParser.SimpleRoleContext;
-import ua.alu.npj6.parser.PredicateParser.MultiRoleContext;
+import ua.alu.npj6.HGC.parser.PredicateBaseVisitor;
+import ua.alu.npj6.HGC.parser.PredicateParser.SimpleRoleContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.MultiRoleContext;
 
 public class RoleVisitor extends PredicateBaseVisitor<Role> {
     ParserContext parserContext;
