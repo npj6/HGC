@@ -10,6 +10,7 @@ import java.io.IOException;
 import ua.alu.npj6.parser.visitors.HandFileVisitor;
 import ua.alu.npj6.parser.model.HandFile;
 import ua.alu.npj6.parser.model.ParserContext;
+import ua.alu.npj6.parser.model.Expression;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.Recognizer;
@@ -26,7 +27,7 @@ public class HGCParser {
     ParserContext parserContext = null;
     HandFile handFile = null;
 
-    public HGCParser(String handfile, Decklist decklist) {
+    public HGCParser(String handfile, Decklist decklist, int hand) {
         try  {
             PredicateLexer lexer = new PredicateLexer(CharStreams.fromFileName(handfile));
             lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
@@ -37,14 +38,17 @@ public class HGCParser {
             e.printStackTrace();
         }
 
-        parserContext = new ParserContext(decklist);
+        parserContext = new ParserContext(decklist, hand);
         HandFileVisitor handFileVisitor = new HandFileVisitor(parserContext);
 
         try {
             handFile = handFileVisitor.visit(parser.handFile());
-            System.out.println(handFile);
+            //System.out.println(handFile);
             System.out.println("Canonical Form");
-            System.out.println(handFile.canonicalForm());
+            for (Expression expr : handFile.expressions) {
+                System.out.println(expr);
+                System.out.println(expr.canonicalForm());
+            }
         } catch (ParseCancellationException e) {
             successful = false;
             System.out.println("[ERROR] Parsing of hand file ended unexpectedly");

@@ -49,7 +49,7 @@ public class Expression {
             out += "@" + Integer.toString(draws) + "\n\t" + condition.toString().replaceAll("\n", "\n\t");
         }
         if (expressions != null) {
-            out += "Expresion "+operation;
+            out += "Expression "+operation;
             for (Expression exp : expressions) {
                 out += "\n\t" + exp.toString().replaceAll("\n", "\n\t");
             }

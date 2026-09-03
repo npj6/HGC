@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class HandFile {
-    List<String> names;
-    List<Expression> expressions;
+    public List<String> names;
+    public List<Expression> expressions;
 
     public HandFile(List<String> names, List<Expression> expressions) {
         this.names = names;

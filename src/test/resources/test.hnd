@@ -1,11 +1,21 @@
 
+"TEST" = "A" & "B" & "C" @ 8;
 
 "TEST_ROLE1" = ("A" | "C");
 
 "TEST" = "TEST_ROLE1" @ 5;
-"TEST" = "B"x1 @ 5;
+"TEST" = "TEST_ROLE1"x0 @ 5;
+"TEST" = "ERROR"!x0 @ 5;
+"TEST" = "ERROR2"x0 @ 5;
+"TEST" = "ERROR2"x3 @ 5;
+"TEST" = "ERROR"!x3 @ 5;
+"TEST" = "B"x2 @ 5;
+"TEST" = "B"x3 @ 5;
 "TEST" = ("A" | "B")!x1 @ 5;
 "TEST" = ("A" | "B" | "C") @ 17;
+"TEST" = "TEST_ROLE1"x3 @ 18;
+"TEST" = "A"x0 | "B"x2 & "C"x0 & "D"x4 @ 19;
+"TEST" = "A"x0 ^& "B"x2 & "C"x0 & "D"x4 @ 20;
 
 "TEST_ROLE2" = ("A" | "TEST_ROLE1" | "C");
 

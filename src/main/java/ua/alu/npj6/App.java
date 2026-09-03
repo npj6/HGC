@@ -14,8 +14,8 @@ import ua.alu.npj6.shuffler.Strategy;
 import ua.alu.npj6.parser.HGCParser;
 
 public class App {
-    static void ANTLR4Test(Decklist decklist) {
-       HGCParser parser = new HGCParser("src\\test\\resources\\test.hnd", decklist);
+    static void ANTLR4Test(Decklist decklist, int hand) {
+       HGCParser parser = new HGCParser("src\\test\\resources\\test.hnd", decklist, hand);
 
        if (parser.successful) {
             System.out.println("Parsing successful");
@@ -28,10 +28,11 @@ public class App {
         File file = new File(args[0]);
         Decklist decklist = new Decklist(file);
 
-        ANTLR4Test(decklist);
+        final int HAND_SIZE = 7;
+
+        ANTLR4Test(decklist, HAND_SIZE);
         /*
 
-        final int HAND_SIZE = 7;
         final long HANDS_N = 100000000L; //cien millones
         final double MEASURE = 1000000.0; //ms
         BiPredicate<Decklist, int[]> check = (Decklist deck, int[] hand) -> {

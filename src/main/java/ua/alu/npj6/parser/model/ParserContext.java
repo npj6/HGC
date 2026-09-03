@@ -12,10 +12,13 @@ public class ParserContext {
 
     public Decklist decklist;
 
-    public ParserContext(Decklist decklist) {
+    int hand;
+
+    public ParserContext(Decklist decklist, int hand) {
         this.roleNames = new ArrayList<>();
         this.roles = new ArrayList<>();
         this.missingNames = new ArrayList<>();
         this.decklist = decklist;
+        this.hand = hand;
     }
 }
