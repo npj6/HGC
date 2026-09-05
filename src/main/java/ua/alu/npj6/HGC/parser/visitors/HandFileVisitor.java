@@ -30,8 +30,13 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
                 names.add(l.name);
                 expressions.add(l.expr);
             } else if (l.role != null) {
-                parserContext.roleNames.add(l.name);
-                parserContext.roles.add(l.role);
+                int idx = parserContext.roleNames.indexOf(l.name);
+                if (idx == -1) {
+                    parserContext.roleNames.add(l.name);
+                    parserContext.roles.add(l.role);
+                } else {
+                    parserContext.roles.set(idx, l.role);
+                }
             }
             
         }

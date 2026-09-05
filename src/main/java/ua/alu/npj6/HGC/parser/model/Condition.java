@@ -33,12 +33,6 @@ public class Condition {
         return this.operation;
     }
 
-    // (A | B) x3 -> Ax3 | Ax2&Bx1 | Ax1&Bx2 | Bx3
-    // (A | B)!x2 -> A!x2&B!x0 | A!x1&B!x1 | A!x0&B!x2
-    private Condition ComplexRoleToOrCondition(ParserContext parserContext) {
-        return restriction.complexRole2OrCondition().canonicalForm(parserContext);
-    }
-
     //Use only for &s of simple conditions
     //Counts the minimum draws needed to satisfy the &
     public int restrictionCount() {
@@ -309,24 +303,75 @@ public class Condition {
         }
     }
 
-    public boolean isMoreOrEquallyRestrictiveThan(Condition c) {
-        if (this.restriction != null && c.restriction != null) {
-            return this.restriction.isMoreOrEquallyRestrictiveThan(c.restriction);
-        } else if (this.conditions != null && c.conditions != null && this.operation.equals(c.operation)) {
-            for (Condition c2 : c.conditions) {
-                boolean found = false;
-                for (Condition c1 : this.conditions) {
-                    if (c1.isMoreOrEquallyRestrictiveThan(c2)) {
-                        found = true;
-                    }
+    public Expression condition2Expression(int draws) {
+        if (this.constant != null) {
+            return new Expression(this.constant);
+        } else if (this.conditions != null) {
+            ArrayList<Expression> expressions = new ArrayList<>();
+            for (Condition c : this.conditions) {
+                expressions.add(c.condition2Expression(draws));
+            }
+            return new Expression(expressions, this.operation);
+        } else if (this.restriction != null) {
+            return new Expression(this.deepCopy(), draws);
+        } else {
+            return null;
+        }
+    }
+
+    public Condition restrictMaximum(int draws) {
+        if ("|".equals(this.operation)) {
+            ArrayList<Condition> conditions = new ArrayList<>();
+            for (Condition c : this.conditions) {
+                conditions.add(c.restrictMaximum(draws));
+            }
+            return new Condition(conditions, "|").collapse();
+        } else if ("&".equals(this.operation) && draws < this.restrictionCount()) {
+                return new Condition(false);
+        } else {
+            return this.deepCopy();
+        }
+    }
+
+    public boolean implies(Condition that) {
+        if (this.constant != null && that.constant != null) {
+            return this.constant.equals(that.constant);
+        } else if (this.constant != null || that.constant != null) {
+            return false;
+        } else if (this.restriction != null && that.restriction != null) {
+            return this.restriction.implies(that.restriction);
+        } else if ("&".equals(this.operation) && that.restriction != null) {
+            //if any element of this (&) implies that (simple), this implies that
+            for (Condition thisC : this.conditions) {
+                if (thisC.implies(that)) {
+                    return true;
                 }
-                if (!found) {
+            }
+            return false;
+        } else if (!"|".equals(this.operation) && "&".equals(that.operation)) {
+            //if all elements of that (&) are implied by this (&/simple), this implies that
+            for (Condition thatC : that.conditions) {
+                if(!this.implies(thatC)) {
+                    return false;
+                }                
+            }
+            return true;
+        } else if (!"|".equals(this.operation) && "|".equals(that.operation)) {
+            //if any element of that (|) is implied by this (&/simple), this implies that
+            for (Condition thatC : that.conditions) {
+                if (this.implies(thatC)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if ("|".equals(this.operation)) {
+            //if all elements of this (|) imply that (|/&/simple), this implies that
+            for (Condition thisC : this.conditions) {
+                if (!thisC.implies(that)) {
                     return false;
                 }
             }
             return true;
-        } else if (this.constant != null && c.constant != null) {
-            return this.constant.equals(c.constant);
         } else {
             return false;
         }
@@ -347,7 +392,7 @@ public class Condition {
 
                     for (Condition cond2 : conditions) {
                         if (cond1 != cond2) {
-                            if (cond2.isMoreOrEquallyRestrictiveThan(cond1)) {
+                            if (cond2.implies(cond1)) {
                                 changed = true;
                             } else {
                                 newConditions.add(cond2.deepCopy());
@@ -415,7 +460,7 @@ public class Condition {
                 if (!restriction.exact && restriction.quantity == 0) {
                     return new Condition(true);
                 } else {
-                    return ComplexRoleToOrCondition(parserContext);
+                    return this.restriction.complexRole2OrCondition().canonicalForm(parserContext);
                 }
             }
         } else if (this.conditions != null) {

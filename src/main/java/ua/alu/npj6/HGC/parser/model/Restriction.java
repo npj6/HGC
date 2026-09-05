@@ -13,20 +13,17 @@ public class Restriction {
         this.quantity = quantity;
     }
 
-    public boolean isMoreOrEquallyRestrictiveThan(Restriction r) {
-        //doesnt really work with complex roles
-        //a more restrictive role combined with x yields a more restrictive restriction
-        //a more restrictive role combined with !x may yield a less restrictive restriction
-        if (this.role.isMoreOrEquallyRestrictiveThan(r.role)) { //efectively EQ
-            if (!this.exact && !r.exact) {
-                return r.quantity <= this.quantity;
-            } else if (this.exact && r.exact) {
-                return r.quantity == this.quantity;
+    public boolean implies(Restriction that) {
+        if (this.role.implies(that.role)) { //efectively EQ
+            if (!this.exact && !that.exact) {
+                return that.quantity <= this.quantity;
+            } else if (this.exact && that.exact) {
+                return that.quantity == this.quantity && that.role.implies(this.role);
             } else {
                 if (!this.exact) {
                     return false;
                 } else {
-                    return r.quantity <= this.quantity;
+                    return that.quantity <= this.quantity;
                 }
             }
         } else {

@@ -48,6 +48,7 @@ public class HGCParser {
             for (Expression expr : handFile.expressions) {
                 System.out.println(expr);
                 System.out.println(expr.canonicalForm());
+                System.out.println("---------------------------------------------");
             }
         } catch (ParseCancellationException e) {
             successful = false;

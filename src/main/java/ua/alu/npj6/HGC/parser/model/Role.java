@@ -25,12 +25,11 @@ public class Role {
         return new Role(indexes);
     }
 
-    //the more subroles, the less restrictive
-    public boolean isMoreOrEquallyRestrictiveThan(Role r) {
-        for(Integer i1 : this.indexes) {
+    public boolean implies(Role that) {
+        for(Integer i2 : that.indexes) {
             boolean found = false;
-            for (Integer i2 : r.indexes) {
-                if (i1.equals(i2)) {
+            for (Integer i1 : this.indexes) {
+                if (i2.equals(i1)) {
                     found = true;
                 }
             }
