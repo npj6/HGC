@@ -26,8 +26,13 @@ public class HGCParser {
     PredicateParser parser = null;
     ParserContext parserContext = null;
     HandFile handFile = null;
+    HandFile optimizedHandFile = null;
 
-    public HGCParser(String handfile, Decklist decklist, int hand) {
+    public HandFile getOptimizedHandFile() {
+        return optimizedHandFile;
+    }
+
+    public HGCParser(String handfile, Decklist decklist) {
         try  {
             PredicateLexer lexer = new PredicateLexer(CharStreams.fromFileName(handfile));
             lexer.addErrorListener(ThrowingErrorListener.INSTANCE);
@@ -38,22 +43,18 @@ public class HGCParser {
             e.printStackTrace();
         }
 
-        parserContext = new ParserContext(decklist, hand);
+        parserContext = new ParserContext(decklist);
         HandFileVisitor handFileVisitor = new HandFileVisitor(parserContext);
 
         try {
             handFile = handFileVisitor.visit(parser.handFile());
-            //System.out.println(handFile);
-            System.out.println("Canonical Form");
-            for (Expression expr : handFile.expressions) {
-                System.out.println(expr);
-                System.out.println(expr.canonicalForm());
-                System.out.println("---------------------------------------------");
-            }
         } catch (ParseCancellationException e) {
             successful = false;
             System.out.println("[ERROR] Parsing of hand file ended unexpectedly");
         }
+
+        handFile = handFile.canonicalForm();
+        optimizedHandFile = handFile.optimize(parserContext);
     }
 
     public static class ThrowingErrorListener extends BaseErrorListener {

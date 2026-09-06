@@ -427,86 +427,29 @@ public class Condition {
         return current;
     }
 
-    public Condition canonicalForm(ParserContext parserContext) {
-        if (this.restriction != null) {
-            //Simple condition
-            if (restriction.role.indexes.size() == 0) {
-                //Empty role
-                if (restriction.quantity == 0) {
-                    return new Condition(true);
-                } else {
-                    return new Condition(false);
-                }
-            } else if (restriction.role.indexes.size() == 1) {
-                int idx = restriction.role.indexes.get(0);
-                //Simple role
-                if (idx < 0) {
-                    if (restriction.quantity == 0) {
-                        return new Condition(true);
-                    } else {
-                        return new Condition(false);
-                    }
-                }else if (!restriction.exact && restriction.quantity == 0) {
-                    return new Condition(true);
-                } else if (parserContext.decklist.quantities[idx] < restriction.quantity) {
-                    return new Condition(false);
-                } else if (parserContext.hand < restriction.quantity) {
-                    return new Condition(false);
-                } else {
-                    return new Condition(restriction.canonicalForm(parserContext));
-                }
-            } else {
-                //Complex role
-                if (!restriction.exact && restriction.quantity == 0) {
-                    return new Condition(true);
-                } else {
-                    return this.restriction.complexRole2OrCondition().canonicalForm(parserContext);
-                }
+    //apply only after canonical form
+    public Condition optimize(ParserContext parserContext) {
+        if (this.conditions != null) {
+            ArrayList<Condition> conditions = new ArrayList<>();
+            for(Condition c : this.conditions) {
+                conditions.add(c.optimize(parserContext));
             }
-        } else if (this.conditions != null) {
-            //Complex conditions
-            if (this.conditions.size() == 0) {
-                //No subconditions
+            return new Condition(conditions, this.operation);
+        } else if (this.restriction != null) {
+            int idx = this.restriction.role.indexes.get(0);
+            if (idx < 0) {
+                if (this.restriction.exact && this.restriction.quantity == 0) {
+                    return new Condition(true); //exactly 0 of non existent? no prob bob.
+                } else {
+                    return new Condition(false);
+                }
+            } else if (parserContext.decklist.quantities[idx] < this.restriction.quantity) {
                 return new Condition(false);
-            } else if (this.conditions.size() == 1) {
-                //Single subcondition
-                return this.conditions.get(0).canonicalForm(parserContext);
             } else {
-                //Multiple subconditions
-                ArrayList<Condition> conditions = new ArrayList<>();
-
-                for (Condition cond : this.conditions) {
-                    Condition c = cond.canonicalForm(parserContext);
-
-                    if (c.constant != null) {
-                        if (operation.equals("&") || operation.equals("^&")) {
-                            if (!c.constant) {
-                                return new Condition(false);
-                            } // true & is ignored
-                        } else if (operation.equals("|")) {
-                            if (c.constant) {
-                                return new Condition(true);
-                            } // false | is ignored
-                        } // there should be no other operations
-                    } else {
-                        //collapse same operations
-                        if (operation.equals(c.operation)) {
-                            for (Condition c2 : c.conditions) {
-                                conditions.add(c2);
-                            }
-                        } else {
-                            conditions.add(c);
-                        }
-                    }
-                }
-
-                return new Condition(conditions, operation);
+                return deepCopy();
             }
-        }  else if (this.constant != null) {
-            //Constant condition
-            return new Condition(this.constant);
         } else {
-            return null;
+            return deepCopy();
         }
     }
 

@@ -1,44 +1,44 @@
 
-"TEST" = "A" & "B" & "C" @ 8;
+"TEST1" = "A" & "B" & "C" @ 8;
 
 "TEST_ROLE1" = ("A" | "C");
 
-"TEST" = "TEST_ROLE1" @ 5;
-"TEST" = "TEST_ROLE1"x0 @ 5;
-"TEST" = "ERROR"!x0 @ 5;
-"TEST" = "ERROR2"x0 @ 5;
-"TEST" = "ERROR2"x3 @ 5;
-"TEST" = "ERROR"!x3 @ 5;
-"TEST" = "B"x2 @ 5;
-"TEST" = "B"x3 @ 5;
-"TEST" = ("A" | "B")!x1 @ 5;
-"TEST" = ("A" | "B" | "C") @ 17;
-"TEST" = "TEST_ROLE1"x3 @ 18;
-"TEST" = "A"x0 | "B"x2 & "C"x0 & "D"x4 @ 19;
-"TEST" = "A"x0 ^& "B"x2 & "C"x0 & "D"x4 @ 20;
+"TEST2" = "TEST_ROLE1" @ 5;
+"TEST3" = "TEST_ROLE1"x0 @ 5;
+"TEST4" = "ERROR"!x0 @ 5;
+"TEST5" = "ERROR2"x0 @ 5;
+"TEST6" = "ERROR2"x3 @ 5;
+"TEST7" = "ERROR"!x3 @ 5;
+"TEST8" = "B"x2 @ 5;
+"TEST9" = "B"x3 @ 5;
+"TEST10" = ("A" | "B")!x1 @ 5;
+"TEST11" = ("A" | "B" | "C") @ 17;
+"TEST12" = "TEST_ROLE1"x3 @ 18;
+"TEST13" = "A"x0 | "B"x2 & "C"x0 & "D"x4 @ 19;
+"TEST14" = "A"x0 ^& "B"x2 & "C"x0 & "D"x4 @ 20;
 
 "TEST_ROLE2" = ("A" | "TEST_ROLE1" | "C");
 
-"TEST" = "A" & "B" @ 5;
-"TEST" = "A" | "B" @ 5;
-"TEST" = "A" ^& "B" @ 5;
-"TEST" = ("TEST_ROLE2") @ 7;
+"TEST15" = "A" & "B" @ 5;
+"TEST16" = "A" | "B" @ 5;
+"TEST17" = "A" ^& "B" @ 5;
+"TEST18" = ("TEST_ROLE2") @ 7;
 
 "TEST_ROLE3" = "A" ;
 
-"TEST" = "A" & "B" ^& "A" & "B" | "A" & "B" ^& "A" & "B" @ 5;
-"TEST" = ("A" ^& "B") & ("A" ^& "B") | ("A" ^& "B") & ("A" ^& "B") @ 5;
-"TEST" = ("A" | "B") & ("A" | "B") ^& ("A" | "B") & ("A" | "B") @ 5;
-"TEST" = ("A" & "B" | "A" & "B") ^& ("A" & "B" | "A" & "B") @ 5;
-"TEST" = ("A" ^& "B" | "A" ^& "B") & ("A" ^& "B" | "A" ^& "B") @ 5;
-"TEST" = ("A" | "B") ^& ("A" | "B") & ("A" | "B") ^& ("A" | "B") @ 5;
+"TEST19" = "A" & "B" ^& "A" & "B" | "A" & "B" ^& "A" & "B" @ 5;
+"TEST20" = ("A" ^& "B") & ("A" ^& "B") | ("A" ^& "B") & ("A" ^& "B") @ 5;
+"TEST21" = ("A" | "B") & ("A" | "B") ^& ("A" | "B") & ("A" | "B") @ 5;
+"TEST22" = ("A" & "B" | "A" & "B") ^& ("A" & "B" | "A" & "B") @ 5;
+"TEST23" = ("A" ^& "B" | "A" ^& "B") & ("A" ^& "B" | "A" ^& "B") @ 5;
+"TEST24" = ("A" | "B") ^& ("A" | "B") & ("A" | "B") ^& ("A" | "B") @ 5;
 
-"TEST" = "A" @ 5 & "B" @ 6;
-"TEST" = "A" @ 5 | "B" @ 6;
-"TEST" = ("A" @ 5 | "B" @ 6) & ("A" @ 5 | "B" @ 6);
-"TEST" = "A" @ 5 & "B" @ 6 | "A" @ 5 & "B" @ 6;
+"TEST25" = "A" @ 5 & "B" @ 6;
+"TEST26" = "A" @ 5 | "B" @ 6;
+"TEST27" = ("A" @ 5 | "B" @ 6) & ("A" @ 5 | "B" @ 6);
+"TEST28" = "A" @ 5 & "B" @ 6 | "A" @ 5 & "B" @ 6;
 
-"TEST" = (("A" | "B" | "C") & "A"!x1 ^& "B" | "C"!x1 @ 7
+"TEST29" = (("A" | "B" | "C") & "A"!x1 ^& "B" | "C"!x1 @ 7
         | ("A" | "B" | "C") & "A"!x1 ^& "B" | "C"!x1 @ 7 ) 
        & (("A" | "B" | "C") & "A"!x1 ^& "B" | "C"!x1 @ 7
         | ("A" | "B" | "C") & "A"!x1 ^& "B" | "C"!x1 @ 7 )
@@ -50,25 +50,25 @@
 
 "TEST_ROLE1" = ("A" | "D");
 
-"TEST" = "TEST_ROLE1"x2 @ 7 & "A" @ 1 & "C" @ 8 & "B" @ 8 | "TEST_ROLE1"x2 @ 7 & "A" @ 1 & "B" @ 8 & "C" @ 8;
-"TEST" = "TEST_ROLE1"!x2 @ 7 & "A" @ 1 & "C" @ 8 & "B" @ 8 | "TEST_ROLE1"!x2 @ 7 & "A" @ 1 & "B" @ 8 & "C" @ 8;
-"TEST" = "TEST_ROLE1" @ 7 & "A" @ 1 & "C" @ 8 & "B"x2 @ 8 | "TEST_ROLE1" @ 7 & "A" @ 1 & "B" @ 8 & "C"x2 @ 8;
+"TEST30" = "TEST_ROLE1"x2 @ 7 & "A" @ 1 & "C" @ 8 & "B" @ 8 | "TEST_ROLE1"x2 @ 7 & "A" @ 1 & "B" @ 8 & "C" @ 8;
+"TEST31" = "TEST_ROLE1"!x2 @ 7 & "A" @ 1 & "C" @ 8 & "B" @ 8 | "TEST_ROLE1"!x2 @ 7 & "A" @ 1 & "B" @ 8 & "C" @ 8;
+"TEST32" = "TEST_ROLE1" @ 7 & "A" @ 1 & "C" @ 8 & "B"x2 @ 8 | "TEST_ROLE1" @ 7 & "A" @ 1 & "B" @ 8 & "C"x2 @ 8;
 
-"TEST" = "A"x2 & "B" | "B" @ 8;
+"TEST33" = "A"x2 & "B" | "B" @ 8;
 
-"TEST" = "A"x2 & "B" | "A" & "B" @ 8;
+"TEST34" = "A"x2 & "B" | "A" & "B" @ 8;
 
-"TEST" = "A"x3 | "A"x2 @7;
+"TEST35" = "A"x3 | "A"x2 @7;
 
-"TEST" = "A" @ 1 & "B" @ 1 & "A" & "B" @ 2;
+"TEST36" = "A" @ 1 & "B" @ 1 & "A" & "B" @ 2;
 
-"TEST" = "A" @ 1 & "B" @ 2 & "A" & "B" @ 2;
+"TEST37" = "A" @ 1 & "B" @ 2 & "A" & "B" @ 2;
 
-"TEST" = "A" @ 1 & "B" @ 2 & "A" & "B" @ 3;
+"TEST38" = "A" @ 1 & "B" @ 2 & "A" & "B" @ 3;
 
-"TEST" = "A" & "B" @ 2 & "A" & "B" @ 3;
+"TEST39" = "A" & "B" @ 2 & "A" & "B" @ 3;
 
-"TEST" = "A" @ 1 & "B" @ 2 & "C" @ 3 & "D" @ 4 & "A"&"B"&"C"&"D" @ 5;
+"TEST40" = "A" @ 1 & "B" @ 2 & "C" @ 3 & "D" @ 4 & "A"&"B"&"C"&"D" @ 5;
 
 
-"TEST" = "A" @ 1 & "B" @ 2 & "C" & "B" @ 2;
+"TEST41" = "A" @ 1 & "B" @ 2 & "C" & "B" @ 2;

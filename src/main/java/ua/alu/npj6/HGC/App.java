@@ -14,14 +14,16 @@ import ua.alu.npj6.HGC.shuffler.Strategy;
 import ua.alu.npj6.HGC.parser.HGCParser;
 
 public class App {
-    static void ANTLR4Test(Decklist decklist, int hand) {
-       HGCParser parser = new HGCParser("src\\test\\resources\\test.hnd", decklist, hand);
+    static void ANTLR4Test(Decklist decklist) {
+        HGCParser parser = new HGCParser("src\\test\\resources\\test.hnd", decklist);
 
-       if (parser.successful) {
+        if (parser.successful) {
             System.out.println("Parsing successful");
-       } else {
+        } else {
             System.out.println("Parsing unsuccessful");
-       }
+        }
+
+        System.out.println(parser.getOptimizedHandFile());
     }
 
     public static void main(String[] args) {
@@ -30,7 +32,7 @@ public class App {
 
         final int HAND_SIZE = 7;
 
-        ANTLR4Test(decklist, HAND_SIZE);
+        ANTLR4Test(decklist);
         /*
 
         final long HANDS_N = 100000000L; //cien millones

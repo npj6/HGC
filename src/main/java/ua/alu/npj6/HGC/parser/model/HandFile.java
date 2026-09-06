@@ -32,6 +32,19 @@ public class HandFile {
         return new HandFile(names, expressions);
     }
 
+    //apply only after canonicalForm
+    public HandFile optimize(ParserContext parserContext) {
+        ArrayList<String> names = new ArrayList<>();
+        ArrayList<Expression> expressions = new ArrayList<>();
+
+        for(int i=0; i<this.names.size(); i++) {
+            names.add(this.names.get(i));
+            expressions.add(this.expressions.get(i).optimize(parserContext).canonicalForm());
+        }
+
+        return new HandFile(names, expressions);
+    }
+
     @Override
     public String toString() {
         String out = "";

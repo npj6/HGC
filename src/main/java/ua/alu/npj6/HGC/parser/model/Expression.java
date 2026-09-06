@@ -391,6 +391,26 @@ public class Expression {
         return current;
     }
 
+    //apply only after canonicalForm
+    public Expression optimize(ParserContext parserContext) {
+        if (this.expressions != null) {
+            ArrayList<Expression> expressions = new ArrayList<>();
+            for (Expression expr : this.expressions) {
+                expressions.add(expr.optimize(parserContext));
+            }
+            return new Expression(expressions, this.operation);
+        } else if (this.condition != null) {
+            Condition condition = this.condition.optimize(parserContext).canonicalForm();
+            if (!Boolean.FALSE.equals(condition.constant) && parserContext.decklist.list.length <= this.draws) {
+                return new Expression(true);
+            } else {
+                return new Expression(condition, this.draws);
+            }
+        } else {
+            return deepCopy();
+        }
+    }
+
     public boolean implies(Expression that) {
         if (this.constant != null && that.constant != null) {
             return this.constant.equals(that.constant);
