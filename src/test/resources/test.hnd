@@ -1,4 +1,6 @@
 
+// comment
+
 "TEST1" = "A" & "B" & "C" @ 8;
 
 "TEST_ROLE1" = ("A" | "C");

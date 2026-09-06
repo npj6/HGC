@@ -49,4 +49,6 @@ EOL: ';';
 
 EQ: '=';
 
+COMMENT: '//' ~[\n]* '\n' -> skip;
+
 WS : [ \t\r\n]+ -> skip ;
