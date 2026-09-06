@@ -3,9 +3,9 @@ package ua.alu.npj6.HGC.parser.model;
 import java.util.ArrayList;
 
 public class Restriction {
-    public Role role;
-    public boolean exact;
-    public int quantity;
+    Role role;
+    boolean exact;
+    int quantity;
 
     public Restriction(Role role, boolean exact, int quantity) {
         this.role = role;
@@ -82,10 +82,6 @@ public class Restriction {
 
     public Restriction deepCopy() {
         return new Restriction(role.deepCopy(), exact, quantity);
-    }
-
-    public Restriction canonicalForm(ParserContext parserContext) {
-        return deepCopy();
     }
 
     @Override

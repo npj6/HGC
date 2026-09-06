@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Expression {
-    public Condition condition = null;
+    Condition condition = null;
 
-    public List<Expression> expressions = null;
-    public String operation = null;
+    List<Expression> expressions = null;
+    String operation = null;
 
-    public int draws;
+    int draws;
 
-    public Boolean constant = null;
+    Boolean constant = null;
 
     public Expression(boolean constant) {
         this.constant = constant;
@@ -39,17 +39,6 @@ public class Expression {
                 this.draws = expr.draws;
             }
         }
-    }
-
-    public void add (Expression expression) {
-        if (this.draws < expression.draws) {
-            this.draws = expression.draws;
-        }
-        this.expressions.add(expression);
-    }
-
-    public String operation() {
-        return this.operation;
     }
 
     public Expression deepCopy() {

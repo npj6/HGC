@@ -25,10 +25,6 @@ public class Condition {
         this.operation = operation;
     }
 
-    public void add(Condition condition) {
-        this.conditions.add(condition);
-    }
-
     public String operation() {
         return this.operation;
     }

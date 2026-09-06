@@ -40,10 +40,6 @@ public class Role {
         return true;
     }
 
-    public Role canonicalForm(ParserContext parserContext) {
-        return deepCopy();
-    }
-
     @Override
     public String toString() {
         return indexes.toString();
