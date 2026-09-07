@@ -12,6 +12,7 @@ import ua.alu.npj6.HGC.parser.PredicateParser.AndCondContext;
 import ua.alu.npj6.HGC.parser.PredicateParser.XAndCondContext;
 import ua.alu.npj6.HGC.parser.PredicateParser.OrCondContext;
 import ua.alu.npj6.HGC.parser.PredicateParser.PCondContext;
+import ua.alu.npj6.HGC.parser.PredicateParser.NamedCondContext;
 
 public class ConditionVisitor extends PredicateBaseVisitor<Condition> {
     RestrictionVisitor restrictionVisitor;
@@ -54,5 +55,23 @@ public class ConditionVisitor extends PredicateBaseVisitor<Condition> {
     @Override
     public Condition visitPCond(PCondContext ctx) {
         return visit(ctx.getChild(1));
+    }
+
+    @Override
+    public Condition visitNamedCond(NamedCondContext ctx) {
+        String name = ctx.getChild(1).getText();
+        name = name.substring(1, name.length() - 1);
+
+        int idx = parserContext.condNames.indexOf(name);
+        if (idx == -1) {
+            int condIdx = parserContext.missingCondNames.indexOf(name);
+            if (condIdx == -1) {
+                System.out.println("[WARNING] Condition name "+name+" not previously defined");
+                parserContext.missingCondNames.add(name);
+            }
+            return new Condition(false);
+        } else {
+            return parserContext.conditions.get(idx).deepCopy();
+        }
     }
 }

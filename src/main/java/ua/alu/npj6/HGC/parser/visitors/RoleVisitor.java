@@ -39,11 +39,11 @@ public class RoleVisitor extends PredicateBaseVisitor<Role> {
             }
         } else {
             //name not found (stored as -(missingNameIdx+1))
-            roleIdx = parserContext.missingNames.indexOf(reference); 
+            roleIdx = parserContext.missingRoleNames.indexOf(reference); 
             if (roleIdx == -1) {
-                System.out.println("[WARNING] Name "+reference+" not previously defined");
-                parserContext.missingNames.add(reference);
-                indexes.add(-parserContext.missingNames.size());
+                System.out.println("[WARNING] Role name "+reference+" not previously defined");
+                parserContext.missingRoleNames.add(reference);
+                indexes.add(-parserContext.missingRoleNames.size());
             } else {
                 indexes.add(-(roleIdx+1));
             }

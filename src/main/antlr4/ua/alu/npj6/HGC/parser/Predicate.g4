@@ -4,12 +4,14 @@ handFile: (line)+ EOF ;
 
 line: NAME EQ expression EOL            # HandLine
     | NAME EQ role EOL                  # RoleLine
+    | COND_T NAME EQ condition EOL      # ConditionLine
     ;
 
 expression: condition AT NUMBER         # SimpleExpr
           | expression AND expression   # AndExpr
           | expression OR expression    # OrExpr
           | LP expression RP            # PExpr
+          | EXPR_T NAME                 # NamedExpr
           ;
 
 condition: restriction                  # SimpleCond
@@ -17,6 +19,7 @@ condition: restriction                  # SimpleCond
          | condition XAND condition     # XAndCond
          | condition OR condition       # OrCond
          | LP condition RP              # PCond
+         | COND_T NAME                  # NamedCond
          ;
 
 restriction: role                       # SimpleRestrict
@@ -48,6 +51,10 @@ NUMBER : [0-9]+ ;
 EOL: ';';
 
 EQ: '=';
+
+COND_T : 'COND';
+
+EXPR_T : 'HAND';
 
 COMMENT: '//' ~[\n]* '\n' -> skip;
 

@@ -76,3 +76,15 @@
 "TEST41" = "A" @ 1 & "B" @ 2 & "C" & "B" @ 2;
 
 "TEST42" = "A" @ 1 & "B"x2 @ 3 | "B" @ 1 & "C"x2 @ 3 | "C" @1 & "A"x2 @ 3;
+
+COND "C_TEST1" = "B"x2;
+COND "C_TEST2" = "C"x2;
+COND "C_TEST3" = "A"x2;
+
+"TEST43" = "A" @ 1 & COND "C_TEST1" @ 3 | "B" @ 1 & COND "C_TEST2" @ 3 | "C" @1 & COND "C_TEST3" @ 3;
+
+"TEST44" = HAND"TEST43";
+
+"TEST45" = HAND"ERROR";
+
+"TEST46" = COND"ERROR" @ 7;

@@ -28,9 +28,20 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
         for (int i=0; i<ctx.getChildCount()-1; i++) {
             Line l = lineVisitor.visit(ctx.getChild(i));
             if (l.expr != null) {
-                names.add(l.name);
-                expressions.add(l.expr);
-                texts.add(l.text);
+                int idx = parserContext.exprNames.indexOf(l.name);
+                if (idx == -1) {
+                    parserContext.exprNames.add(l.name);
+                    parserContext.expressions.add(l.expr.deepCopy());
+
+                    names.add(l.name);
+                    expressions.add(l.expr);
+                    texts.add(l.text);
+                } else {
+                    parserContext.expressions.set(idx, l.expr.deepCopy());
+
+                    expressions.set(idx, l.expr);
+                    texts.set(idx, l.text);
+                }
             } else if (l.role != null) {
                 int idx = parserContext.roleNames.indexOf(l.name);
                 if (idx == -1) {
@@ -38,6 +49,14 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
                     parserContext.roles.add(l.role);
                 } else {
                     parserContext.roles.set(idx, l.role);
+                }
+            } else if (l.cond != null) {
+                int idx = parserContext.condNames.indexOf(l.name);
+                if (idx == -1) {
+                    parserContext.condNames.add(l.name);
+                    parserContext.conditions.add(l.cond);
+                } else {
+                    parserContext.conditions.set(idx, l.cond);
                 }
             }
             
