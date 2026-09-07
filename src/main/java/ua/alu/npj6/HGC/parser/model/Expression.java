@@ -4,6 +4,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
+import java.util.Comparator;
+
+import ua.alu.npj6.HGC.Decklist;
+
 public class Expression {
     Condition condition = null;
 
@@ -12,7 +19,253 @@ public class Expression {
 
     int draws;
 
+    public int getDraws() { return draws; }
+
     Boolean constant = null;
+
+    Restriction[][][][] shortForm(List<Integer> relevantIndexes) {
+        if (this.condition != null) {
+            Restriction[][][] shortForms = new Restriction[][][]{this.condition.shortForm(relevantIndexes)};
+            return new Restriction[][][][]{shortForms};
+        } else if ("&".equals(this.operation)) {
+            Restriction[][][] shortForms = new Restriction[this.expressions.size()][][];
+            for (int i=0; i<this.expressions.size(); i++) {
+                shortForms[i] = this.expressions.get(i).condition.shortForm(relevantIndexes);
+            }
+            return new Restriction[][][][]{shortForms};
+        } else if ("|".equals(this.operation)) {
+            Restriction[][][][] shortForms = new Restriction[this.expressions.size()][][][];
+            for (int i=0; i<this.expressions.size(); i++) {
+                shortForms[i] = this.expressions.get(i).shortForm(relevantIndexes)[0];
+            }
+            return shortForms;
+        } else {
+            return null;
+        }
+    }
+
+    int[][][] list2Array(List<List<int[]>> list) {
+        int[][][] out = new int[list.size()][][];
+        for (int i=0; i<list.size(); i++) {
+            out[i] = new int[list.get(i).size()][];
+            for (int j=0; j<list.get(i).size(); j++) {
+                out[i][j] = list.get(i).get(j);
+            }
+        }
+        return out;
+    }
+
+    //assumes root expression
+    int[][][] groupByDraws() {
+        if (this.condition != null) {
+            return new int[][][]{{{0, 0}}};
+        } else if ("&".equals(this.operation)) {
+            List<List<int[]>> count = new ArrayList<>();
+
+            //for each possible draws value
+            for (int d=0; d<=this.draws; d++) {
+                //save the shortForm position of matching expressions
+                List<int[]> c = new ArrayList<>(); 
+                for (int expr=0; expr<this.expressions.size(); expr++) {
+                    if (this.expressions.get(expr).draws == d) {
+                        c.add(new int[]{0, expr});
+                    }
+                }
+
+                //only add the list of d draws expressions if not empty
+                if (!c.isEmpty()) {
+                    count.add(c);
+                }
+            }
+
+            return list2Array(count);
+
+        } else if ("|".equals(this.operation)) {
+            List<List<int[]>> count = new ArrayList<>();
+            
+            //for each possible draws value
+            for (int d=0; d<=this.draws; d++) {
+                //save the shortForm position of matching expressions
+                List<int[]> c = new ArrayList<>();
+                for (int expr1=0; expr1<this.expressions.size(); expr1++) {
+                    Expression e1 = this.expressions.get(expr1);
+                    if (e1.condition != null) {
+                        //simple subexpression
+                        if (e1.draws == d) {
+                            c.add(new int[]{expr1, 0});
+                        }
+                    } else if ("&".equals(e1.operation)) {
+                        //and subexpression
+                        for (int expr2=0; expr2<e1.expressions.size(); expr2++) {
+                            Expression e2 = e1.expressions.get(expr2);
+                            if (e2.draws == d) {
+                                c.add(new int[]{expr1, expr2});
+                            }
+                        }
+                    }
+                }
+
+                //only add the list of d draws expressions if not empty
+                if(!c.isEmpty()) {
+                    count.add(c);
+                }
+            }
+
+            return list2Array(count);
+        } else {
+            return null;
+        }
+
+    }
+
+    //use only after canonical form
+    public Supplier<BiPredicate<Decklist, int[]>> getPredicate(Decklist decklist) {
+        if (this.constant != null) {
+            return () -> (Decklist dList, int[] hand) -> this.constant;
+        } else {
+            List<Integer> relevantIndexes = this.relevantIndexes();
+            relevantIndexes.sort(Comparator.naturalOrder());
+            
+            //returns the short array idx for each card, -1 means not relevant
+            int indexes[] = new int[decklist.names.length];
+            for(int i=0; i<indexes.length; i++) {
+                int idx = relevantIndexes.indexOf(i);
+                indexes[i] = idx;
+            }
+
+            //Array (Expr |) of array (Expr &) of array (Cond |) of array (Cond &) of clean restrictions
+            Restriction[][][][] shortForms = this.shortForm(relevantIndexes);
+
+            //Arrays of shortForm positions grouped by number of draws
+            int[][][] drawsGroups = this.groupByDraws();
+
+            //Array with the ammounts of draws in each group
+            int[] drawsArray = new int[drawsGroups.length];
+            for(int i=0; i<drawsGroups.length; i++) {
+                if (this.condition != null) {
+                    drawsArray[i] = this.draws;
+                } else if ("&".equals(this.operation)) {
+                    drawsArray[i] = this.expressions.get(drawsGroups[i][0][1]).draws;
+                } else if ("|".equals(this.operation)) {
+                    Expression subExpr = this.expressions.get(drawsGroups[i][0][0]);
+                    if (subExpr.condition != null) {
+                        drawsArray[i] = subExpr.draws;
+                    } else if ("&".equals(subExpr.operation)) {
+                        drawsArray[i] = subExpr.expressions.get(drawsGroups[i][0][1]).draws;
+                    }
+                }
+            }
+
+            //Research memory alignment to avoid cache misses
+
+            return () -> {
+                //count of relevant indexes in the hand, must be reset to 0
+                int[] handQuantities = new int[shortForms[0][0][0].length];
+                //keeps track of which and expressions have been falsed, must be reset to true
+                boolean[] andExprIs = new boolean[shortForms.length];
+
+                return (Decklist dList, int[] hand) -> {
+                    //reset hand state
+                    for (int i=0; i<handQuantities.length; i++) {
+                        handQuantities[i] = 0;
+                    }
+
+                    //reset and expressions state
+                    for (int i=0; i<andExprIs.length; i++) {
+                        andExprIs[i] = true;
+                    }
+
+                    int currentGroup = 0;
+
+                    //for each draw
+                    for (int draws=1; draws <= hand.length; draws++) {
+                        //update hand state
+                        int idx = indexes[dList.list[hand[draws-1]]];
+                        if (idx != -1) {
+                            handQuantities[idx]++;
+                        }
+
+                        //if current draws group checks at this many draws
+                        if (drawsArray[currentGroup] == draws) {
+                            //for each simple expression in the draw group
+                            for(int simpleExpr=0; simpleExpr<drawsGroups[currentGroup].length; simpleExpr++) {
+                                int[] pos = drawsGroups[currentGroup][simpleExpr];
+                                //if the and expression has not been falsed yet
+                                if (andExprIs[pos[0]]) {
+                                    Restriction[][] expr = shortForms[pos[0]][pos[1]];
+                                    boolean simpleExprIs = false;
+                                    //for each and condition in the simple expression (~= or condition)
+                                    for (int andCond=0; andCond<expr.length; andCond++) {
+                                        Restriction[] cond = expr[andCond];
+                                        boolean andCondIs = true;
+                                        //compare hand states
+                                        for(int r=0; r<handQuantities.length; r++) {
+                                            //if relevant to the restriction
+                                            if (cond[r].quantity != -1) {
+                                                //if restriction false
+                                                if (
+                                                    handQuantities[r] < cond[r].quantity ||
+                                                    cond[r].exact && cond[r].quantity < handQuantities[r]
+                                                ) {
+                                                    //stop checking the whole andCond
+                                                    andCondIs = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        //if all restrictions true
+                                        if (andCondIs) {
+                                            //stop checking the simpleExpr
+                                            simpleExprIs = true;
+                                            break;
+                                        }
+                                        
+                                    }
+
+                                    if (!simpleExprIs) {
+                                        //shortForms[pos[0]] has been falsed, ignore it
+                                        andExprIs[pos[0]] = false;
+                                    } else if (pos[1]+1 == shortForms[pos[0]].length) {
+                                        //reached the end of shortForms[pos[0]] without falsing it
+                                        //whole condition is satisfied
+                                        return true;
+                                    }
+                                }
+                            }
+
+                            //move to next draws group
+                            currentGroup++;
+                        }
+                    }
+                    //no shortForms[n] has been proven true
+                    //whole condition is not satisfied
+                    return false;
+                };
+            };
+        }
+    }
+
+    //use only after canonical form 
+    public List<Integer> relevantIndexes() {
+        if (this.condition != null) {
+            return this.condition.relevantIndexes();
+        } else if (this.expressions != null) {
+            ArrayList<Integer> relevantIndexes = new ArrayList<>();
+
+            for (Expression expr : this.expressions) {
+                for (Integer idx : expr.relevantIndexes()) {
+                    if (!relevantIndexes.contains(idx)) {
+                        relevantIndexes.add(idx);
+                    }
+                }
+            }
+
+            return relevantIndexes;
+        } else {
+            return new ArrayList<>();
+        }
+    }
 
     public Expression(boolean constant) {
         this.constant = constant;

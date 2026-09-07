@@ -21,12 +21,12 @@ public class LineVisitor extends PredicateBaseVisitor<Line> {
     @Override
     public Line visitHandLine(HandLineContext ctx) {
         String name = ctx.getChild(0).getText();
-        return new Line(name.substring(1, name.length() - 1), expressionVisitor.visit(ctx.getChild(2)));
+        return new Line(name.substring(1, name.length() - 1), expressionVisitor.visit(ctx.getChild(2)), ctx.getChild(2).getText());
     }
 
     @Override
     public Line visitRoleLine(RoleLineContext ctx) {
         String name = ctx.getChild(0).getText();
-        return new Line(name.substring(1, name.length() - 1), roleVisitor.visit(ctx.getChild(2)));
+        return new Line(name.substring(1, name.length() - 1), roleVisitor.visit(ctx.getChild(2)), ctx.getChild(2).getText());
     }
 }

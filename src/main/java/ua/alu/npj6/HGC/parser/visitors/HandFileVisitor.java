@@ -23,12 +23,14 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
     public HandFile visitHandFile(HandFileContext ctx) {
         ArrayList<String> names = new ArrayList<>();
         ArrayList<Expression> expressions = new ArrayList<>();
+        ArrayList<String> texts = new ArrayList<>();
 
         for (int i=0; i<ctx.getChildCount()-1; i++) {
             Line l = lineVisitor.visit(ctx.getChild(i));
             if (l.expr != null) {
                 names.add(l.name);
                 expressions.add(l.expr);
+                texts.add(l.text);
             } else if (l.role != null) {
                 int idx = parserContext.roleNames.indexOf(l.name);
                 if (idx == -1) {
@@ -41,6 +43,6 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
             
         }
 
-        return new HandFile(names, expressions);
+        return new HandFile(names, expressions, texts);
     }
 }

@@ -28,8 +28,12 @@ public class HGCParser {
     HandFile handFile = null;
     HandFile optimizedHandFile = null;
 
-    public HandFile getOptimizedHandFile() {
-        return optimizedHandFile;
+    public Expression getExpression(String name) {
+        return optimizedHandFile.getExpression(name);
+    }
+
+    public String getText(String name) {
+        return optimizedHandFile.getText(name);
     }
 
     public HGCParser(String handfile, Decklist decklist) {

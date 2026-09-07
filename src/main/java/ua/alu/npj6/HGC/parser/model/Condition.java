@@ -12,6 +12,64 @@ public class Condition {
     List<Condition> conditions = null;
     String operation = null;
 
+    Restriction[] baseAndShortForm(List<Integer> relevantIndexes) {
+        Restriction[] shortForms = new Restriction[relevantIndexes.size()];
+        for (int i=0; i<shortForms.length; i++) {
+            shortForms[i] = new Restriction(null, false, -1);
+        }
+        return shortForms;
+    }
+
+    void addRestriction(List<Integer> relevantIndexes, Restriction[] shortForms, Restriction r) {
+        int idx = relevantIndexes.indexOf(r.role.indexes.get(0));
+        shortForms[idx] = r.shortForm();
+    }
+
+    //use only after canonicalForm
+    Restriction[][] shortForm(List<Integer> relevantIndexes) {
+        if (this.restriction != null) {
+            Restriction[] shortForms = baseAndShortForm(relevantIndexes);
+            addRestriction(relevantIndexes, shortForms, this.restriction);
+            return new Restriction[][]{shortForms};
+        } else if ("&".equals(this.operation)) {
+            Restriction[] shortForms = baseAndShortForm(relevantIndexes);
+            for (Condition cond : this.conditions) {
+                addRestriction(relevantIndexes, shortForms, cond.restriction);
+            }
+            return new Restriction[][]{shortForms};
+        } else if ("|".equals(this.operation)) {
+            Restriction[][] shortForms = new Restriction[this.conditions.size()][];
+            for (int i=0; i<this.conditions.size(); i++) {
+                shortForms[i] = this.conditions.get(i).shortForm(relevantIndexes)[0];
+            }
+            return shortForms;
+        } else {
+            return null;
+        }
+
+    }
+
+    //use only after canonical form
+    List<Integer> relevantIndexes() {
+        if (this.restriction != null) {
+            return Arrays.asList(this.restriction.role.indexes.get(0));
+        } else if (this.conditions != null) {
+            ArrayList<Integer> relevantIndexes = new ArrayList<>();
+
+            for (Condition cond : this.conditions) {
+                for (Integer idx : cond.relevantIndexes()) {
+                    if (!relevantIndexes.contains(idx)) {
+                        relevantIndexes.add(idx);
+                    }
+                }
+            }
+
+            return relevantIndexes;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     public Condition(boolean constant) {
         this.constant = constant;
     }

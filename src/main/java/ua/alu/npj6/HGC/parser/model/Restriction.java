@@ -3,9 +3,16 @@ package ua.alu.npj6.HGC.parser.model;
 import java.util.ArrayList;
 
 public class Restriction {
-    Role role;
-    boolean exact;
-    int quantity;
+    public Role role;
+    public boolean exact;
+    public int quantity;
+
+    
+    public Restriction shortForm() {
+        Restriction out = deepCopy();
+        out.role = null;
+        return out;
+    }
 
     public Restriction(Role role, boolean exact, int quantity) {
         this.role = role;
@@ -86,6 +93,6 @@ public class Restriction {
 
     @Override
     public String toString() {
-        return role.toString()+(exact?"!x":"x")+Integer.toString(quantity);
+        return (role == null ? "" : role.toString())+(exact?"!x":"x")+Integer.toString(quantity);
     }
 }

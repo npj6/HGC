@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import java.util.concurrent.Callable;
 
 import ua.alu.npj6.HGC.Decklist;
@@ -20,12 +21,12 @@ public class ConcurrentShufflerTest {
         WorkerShufflerFactory factory = new WorkerShufflerFactory() {
 
             @Override
-            public Callable<Long> get(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long workload) {
+            public Callable<Long> get(Decklist deck, int draws, Supplier<BiPredicate<Decklist, int[]>> checkSupplier, long workload) {
                 return () -> (long) counter.getAndIncrement();
             }
 
             @Override
-            public Callable<Long> get(Decklist deck, int draws, BiPredicate<Decklist, int[]> check, long workload, NextInt nextInt) {
+            public Callable<Long> get(Decklist deck, int draws, Supplier<BiPredicate<Decklist, int[]>> checkSupplier, long workload, NextInt nextInt) {
                 return () -> (long) counter.getAndIncrement();
             }
         };
