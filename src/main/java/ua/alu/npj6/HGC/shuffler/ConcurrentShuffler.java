@@ -41,7 +41,7 @@ public class ConcurrentShuffler {
 
         ExecutorService executor = Executors.newFixedThreadPool(threads, (Runnable r) -> {
             Thread t = new Thread(r);
-            t.setPriority(Thread.MAX_PRIORITY);
+            t.setPriority(Thread.NORM_PRIORITY+1);
             return t;
         });
         

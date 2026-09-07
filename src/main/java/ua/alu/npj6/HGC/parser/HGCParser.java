@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import ua.alu.npj6.HGC.parser.PredicateParser;
 
 import java.io.IOException;
+import java.util.List;
 
 import ua.alu.npj6.HGC.parser.visitors.HandFileVisitor;
 import ua.alu.npj6.HGC.parser.model.HandFile;
@@ -34,6 +35,10 @@ public class HGCParser {
 
     public String getText(String name) {
         return optimizedHandFile.getText(name);
+    }
+
+    public List<String> getNames() {
+        return optimizedHandFile.names;
     }
 
     public HGCParser(String handfile, Decklist decklist) {
