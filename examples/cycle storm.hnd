@@ -1,0 +1,43 @@
+// Role definitions
+
+"CYCLERS" = (
+                "Barren Moor" | "Drannith Healer" | "Drannith Stinger" |
+                "Horror of the Broken Lands" | "Imposing Vantasaur" |
+                "Monstrous Carabid" | "Street Wraith"
+            );
+
+"LANDS" = ( "Barren Moor" | "Great Furnace" | "Vault of Whispers" );
+
+"DRAW" = ( "Rowan's Grim Search" | "Page, Loose Leaf" );
+
+"MANA" = ( "Dark Ritual" | "Cabal Ritual" | "Lotus Petal" );
+
+"COMBO" = ( "Reaping the Graves" | "Songs of the Damned" );
+
+// Hand definition, ^& excludes common cards
+// Barren Moor can only count as a Land or a Cycler
+// Last line enforces between 2 and 4 cyclers 
+
+//"GOOD_HAND" = ("LANDS"x2 ^& "CYCLERS"x2
+//    ^& ("MANA" | "CYCLERS")
+//    ^& ("DRAW" | "CYCLERS")
+//    ^& ("COMBO" | "CYCLERS"))
+//    & ("CYCLERS"!x2 | "CYCLERS"!x3 | "CYCLERS"!x4 ) @7;
+
+// Condition definition, & does not exclude common cards
+// 3 Barren Moor and 2 Street Wraith would satisfy it
+// 2 Vault of Whispers and 3 Street Wraith would not
+
+COND "OK_HAND" = "LANDS"x2 & "CYCLERS"x5;
+
+"OK_STARTING_HAND" = COND"OK_HAND" @ 7;
+//"OK_FIRST_MULLIGAN" = COND"OK_HAND" @ 6;
+//"OK_SECOND_MULLIGAN" = COND"OK_HAND" @ 5;
+
+//COND "FRINGE_HAND" = "LANDS"x1 & "CYCLERS"x4;
+
+//"FRINGE_FIRST_MULLIGAN" = COND"FRINGE_HAND" @ 6;
+//"FRINGE_SECOND_MULLIGAN" = COND"FRINGE_HAND" @ 5;
+
+// Mixed hand, either of the hands satisfy it
+//"GOOD_KEEP" = HAND "GOOD_HAND" | HAND "OK_STARTING_HAND";

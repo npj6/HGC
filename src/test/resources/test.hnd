@@ -88,3 +88,5 @@ COND "C_TEST3" = "A"x2;
 "TEST45" = HAND"ERROR";
 
 "TEST46" = COND"ERROR" @ 7;
+
+"TEST47" = "C" & "C" & "C" @ 5;

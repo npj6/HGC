@@ -16,6 +16,8 @@ import ua.alu.npj6.HGC.shuffler.Strategy;
 import ua.alu.npj6.HGC.parser.HGCParser;
 import ua.alu.npj6.HGC.parser.model.Expression;
 
+import ua.alu.npj6.HGC.parser.model.Role;
+
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -50,7 +52,15 @@ public class App {
 
         File file = new File(ns.getString("deckFile"));
         Decklist decklist = new Decklist(file);
-        HGCParser parser = new HGCParser(ns.getString("handFile"), decklist);
+        long startTime, endTime, duration;
+
+        startTime = System.nanoTime();
+            HGCParser parser = new HGCParser(ns.getString("handFile"), decklist);
+        endTime = System.nanoTime();
+            
+        duration = (endTime - startTime);
+        System.out.println("Duration: "+duration/MEASURE+" ms");
+        System.out.println();
 
         if (!parser.successful) {
             System.out.println("Parsing unsuccessful");

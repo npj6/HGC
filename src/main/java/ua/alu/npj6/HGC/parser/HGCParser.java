@@ -50,6 +50,7 @@ public class HGCParser {
         } catch (IOException e) {
             successful = false;
             e.printStackTrace();
+            return;
         }
 
         parserContext = new ParserContext(decklist);
@@ -60,6 +61,8 @@ public class HGCParser {
         } catch (ParseCancellationException e) {
             successful = false;
             System.out.println("[ERROR] Parsing of hand file ended unexpectedly");
+            successful = false;
+            return;
         }
 
         handFile = handFile.canonicalForm();

@@ -27,7 +27,11 @@ public class HandFile {
             int idx = names.indexOf(name);
             if (idx == -1) {
                 names.add(name);
-                expressions.add(expr.canonicalForm());
+                System.out.println(name);
+                System.out.println(expr);
+                Expression cF = expr.canonicalForm();
+                expressions.add(cF);
+                System.out.println(cF);
                 texts.add(text);
             } else {
                 expressions.set(idx, expr.canonicalForm());

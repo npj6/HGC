@@ -7,7 +7,59 @@ public class Restriction {
     public boolean exact;
     public int quantity;
 
-    
+    //does not modify
+    public Restriction combineAnd(Restriction that) {
+        if (this.role.equals(that.role)) {
+            if (!this.exact && !this.exact) {
+                //both GEQ, choose most restrictive
+                return (this.quantity < that.quantity ? that : this);
+            } else if (this.exact && that.exact) {
+                //both EQ, either equal or incompatible
+                if (this.quantity == that.quantity) {
+                    return this;
+                } else {
+                    return null;
+                }
+            } else {
+                //EQ & GEQ
+                Restriction rEQ, rGEQ;
+                if (this.exact) {
+                    rEQ = this;
+                    rGEQ = that;
+                } else {
+                    rEQ = that;
+                    rGEQ = this;
+                }
+
+                //if compatible, choose most restrictive
+                if (rEQ.quantity < rGEQ.quantity) {
+                    return null;
+                } else {
+                    return rEQ;
+                }
+            }
+
+        } else {
+            return null;
+        }   
+    }
+
+    //does not modify, may create a new Restriction
+    public Restriction combineXAnd(Restriction that) {
+        if (this.role.equals(that.role)) {
+            if (!this.exact && !that.exact) {
+                //GEQ ^& GEQ, both satisfied exclusively requires at least the sum of the mins
+                return new Restriction(this.role, false, this.quantity+that.quantity);
+            } else {
+                //EQ and XAnd are not compatible
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+
     public Restriction shortForm() {
         Restriction out = deepCopy();
         out.role = null;
@@ -83,6 +135,12 @@ public class Restriction {
                     }
                 }
             }
+            for (int i=0; i<conditions.size(); i++) {
+                if (conditions.get(i).conditions.size() == 1) {
+                    conditions.set(i, conditions.get(i).conditions.get(0));
+                }
+            }
+            
             return new Condition(conditions, "|");
         }
     }

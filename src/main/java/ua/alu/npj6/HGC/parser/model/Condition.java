@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.Collections;
+
 public class Condition {
     Boolean constant = null;
 
     Restriction restriction = null;
 
-    List<Condition> conditions = null;
+    ArrayList<Condition> conditions = null;
     String operation = null;
+
+    //every subcondition is simple
+    boolean pure = true;
 
     Restriction[] baseAndShortForm(List<Integer> relevantIndexes) {
         Restriction[] shortForms = new Restriction[relevantIndexes.size()];
@@ -79,12 +84,292 @@ public class Condition {
     }
 
     public Condition (List<Condition> conditions, String operation) {
-        this.conditions = conditions;
+        ArrayList<Condition> conds = new ArrayList<>();
+        for (Condition c: conditions) {
+            if (c.constant != null) {
+                if (!(c.constant ^ "|".equals(operation))) {
+                    // true constant absorbs ors, false constant absorbs ands
+                    this.constant = c.constant;
+                    return;
+                }
+                // otherwise constant is ignored
+            } else {
+                conds.add(c);
+                if (pure && c.conditions != null) {
+                    pure = false;
+                }
+            }
+        }
         this.operation = operation;
+        this.conditions = conds;
+    }
+
+    boolean isPure() {
+        if (conditions != null) {
+            for (Condition c : conditions) {
+                if (c.conditions != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public String operation() {
         return this.operation;
+    }
+
+    //only recursive function in the node pipeline
+    public Condition canonicalFormNode() {
+        if (restriction != null) {
+            Condition c = restriction.complexRole2OrCondition();
+            if (c.conditions != null) {
+                c = c.canonicalFormNode();
+            }
+            return c;
+        } else if (conditions != null) {
+            ArrayList<Condition> newConditions = new ArrayList<>();
+            for (Condition c : conditions) {
+                newConditions.add(c.canonicalFormNode());
+            }
+            
+            //deletes constants
+            Condition current = new Condition(newConditions, operation).collapseNode();
+
+
+            //leaf nodes
+            if (current.constant != null || current.restriction != null) {
+                return current;
+            }
+
+            current = current.extractOrNode();
+            
+
+            return current;
+
+        } else {
+            return this;
+        }
+    }
+
+    //assumes every subcondition is already in canonical form
+    public Condition collapseNode() {
+        if (this.conditions != null && !this.pure) {
+            //only iterates through original subconditions
+            int total = this.conditions.size();
+            for (int i=0; i<total; i++) {
+                Condition cond = this.conditions.get(i);
+                if (operation.equals(cond.operation)) {
+                    //collapse same operations
+                    this.conditions.remove(i);
+                    total--; i--;
+                    //if collapsing an and, start by looking for matches and merging
+                    for(int j=0; j<cond.conditions.size(); j++) {
+                        Condition c2 = cond.conditions.get(j);
+                        if ("&".equals(this.operation)) {
+                            Condition c1 = this.combine(c2, "&");
+                            if (Boolean.FALSE.equals(c1.constant)) {
+                                return c1;
+                            }
+                        } else {
+                            this.conditions.add(c2);
+                        }
+                    }
+                }
+            }
+
+            //consider the results after collapsing
+            if (conditions.size() == 0) {
+                return new Condition(!"|".equals(operation));
+            } else if (conditions.size() == 1) {
+                return conditions.get(0);
+            } else {
+                this.pure = this.isPure();
+                return this;
+            }
+        } else {
+            //do nothing
+            return this;
+        }
+
+    }
+
+    //asumes to be a pure & or a simple cond
+    //does not modify cond, which is asumed a simple or pure & condition in canonical form
+    public Condition combine(Condition cond, String operation) {
+        //for each simple condition to combine
+        int total = (cond.restriction != null ? 1 : cond.conditions.size());
+        for (int i=0; i<total; i++) {
+            Condition c1 = (cond.restriction != null ? cond : cond.conditions.get(i));
+            //look for its role inside this
+            boolean found = false;
+            int total2 = (this.restriction != null ? 1 : this.conditions.size());
+            for (int j=0; j<total2; j++) {
+                Condition c2 = (this.restriction != null ? this : this.conditions.get(j));
+                if (c2.restriction != null && c1.restriction.role.equals(c2.restriction.role)){
+                    //if found, try to merge them
+                    found = true;
+                    Restriction r;
+                    if ("&".equals(operation)){
+                        r = c1.restriction.combineAnd(c2.restriction);
+                    } else {
+                        r = c1.restriction.combineXAnd(c2.restriction);
+                    }
+                    
+                    if (r == null) {
+                        //cannot be merged, this becomes false
+                        return new Condition(false);
+                    } else if (this.conditions != null) {
+                        this.conditions.set(j, new Condition(r));
+                    } else {
+                        this.restriction = r;
+                    }
+                    //stop looking
+                    break;
+                }
+            }
+
+            if (!found) {
+                //if not found, add the condition to this
+                if (this.conditions != null) {
+                    this.conditions.add(c1);
+                } else {
+                    this.conditions = new ArrayList<>();
+                    this.operation = "&";
+                    this.conditions.add(new Condition(this.restriction));
+                    this.conditions.add(c1);
+                    this.pure = true;
+                    this.restriction = null;
+                }
+            }
+        }
+
+        return this;
+    }
+
+
+    public Condition removeDepsOr() {
+        if (this.conditions != null && "|".equals(this.operation)) {
+
+            int total = this.conditions.size();
+            for (int i=0; i<total; i++) {
+                for (int j=0; j<total; j++) {
+                    if (i != j) {
+                        if (this.conditions.get(j).implies(this.conditions.get(i))) {
+                            this.conditions.remove(j);
+                            total--;
+                            if(j < i) {
+                                i--;
+                            }
+                            j--;
+                        }
+                    }
+                }
+            }
+            
+            if (this.conditions.size() == 0) {
+                return new Condition(true); //should not happen
+            } else if (this.conditions.size() == 1) {
+                return this.conditions.get(0);
+            } else {
+                this.pure = this.isPure();
+                return this;
+            }
+        } else {
+            return this;
+        }
+
+    }
+
+    //assumes condition has been collapsed (+ collapsed assumptions), may modify this
+    public Condition extractOrNode() {
+        if (this.conditions == null || this.pure && "&".equals(this.operation)) {
+            // do nothing to simple conditions and pure & conditions
+            return this;
+        } else if ("|".equals(this.operation)) {
+            //check dependancy in |
+            return this.removeDepsOr();
+        } else {
+            //every subcondition is simple, an | or a pure &
+            
+            //combine all simple and pure & conditions
+            Condition pureAnd = new Condition(Collections.emptyList(), "&");
+            for (Condition c : this.conditions) {
+                if (!"|".equals(c.operation)) {
+                    pureAnd = pureAnd.combine(c, this.operation);
+                    if (Boolean.FALSE.equals(pureAnd.constant)) {
+                        //if pureAnd becomes false, will always be false
+                        break;
+                    }
+                }
+            }
+
+            if (pureAnd.conditions.size() == 0) {
+                pureAnd = new Condition(false);
+            } else if (pureAnd.conditions.size() == 1) {
+                pureAnd = pureAnd.conditions.get(0);
+            }
+            
+            //extract the ors
+            ArrayList<Condition> conditions = new ArrayList<>();
+            conditions.add(pureAnd);
+
+            for (Condition c : this.conditions) {
+                if ("|".equals(c.operation)) {
+                    //only iterates through original conditions for each | found
+                    int total = conditions.size();
+                    
+                    while (0 < total) {
+                        total--;
+                        pureAnd = conditions.get(total);
+                        conditions.remove(total);
+
+                        //tries to combine each subSubCond with the pureAnds
+                        for (Condition subSubCond : c.conditions) {
+                            
+                            //ignores false pureAnds, instead tries to add the subSubCond
+                            if (!Boolean.FALSE.equals(pureAnd.constant)) {
+                                subSubCond = subSubCond.deepCopy().combine(pureAnd, this.operation);
+                                if (subSubCond.conditions != null && subSubCond.conditions.size() == 1) {
+                                    subSubCond = subSubCond.conditions.get(0);
+                                }
+                            }
+                            
+                            //ignores false subSubConds (from having combined)
+                            if (!Boolean.FALSE.equals(subSubCond.constant)) {
+                                //check independance from the others subSubConds
+                                boolean independent = true;
+                                int newTotal = conditions.size();
+                                for (int i=total; i<newTotal; i++) {
+                                    Condition other = conditions.get(i);
+                                    if (other.implies(subSubCond)) {
+                                        //remove redundant conditions
+                                        conditions.remove(i);
+                                        i--; newTotal--;
+                                    } else if (subSubCond.implies(other)) {
+                                        independent = false;
+                                        break;
+                                    }
+                                }
+
+                                //only add independent conditions
+                                if (independent) {
+                                    conditions.add(subSubCond);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (conditions.size() == 0) {
+                return new Condition(false);
+            } else if (conditions.size() == 1) {
+                return conditions.get(0);
+            } else {
+                return new Condition(conditions, "|");
+            }
+        }
     }
 
     //Use only for &s of simple conditions
@@ -113,49 +398,62 @@ public class Condition {
         }
     }
 
+
     public Condition collapse() {
-        if (this.conditions != null) {
-            ArrayList<Condition> conditions = new ArrayList<>();
-
-            for (Condition cond : this.conditions) {
-                Condition c = cond.collapse();
-                //collapse same operations
-                if (this.operation.equals(c.operation)) {
-                    for (Condition c2 : c.conditions) {
-                        conditions.add(c2);
+        if (conditions != null) {
+            int total = conditions.size();
+            //for each subcondition
+            for (int i=0; i<total; i++) {
+                Condition cond = conditions.get(i);
+                if (cond.constant != null) {
+                    //remove or return constants
+                    if ("|".equals(operation)) {
+                        //or condition
+                        if (cond.constant) {
+                            return new Condition(true);
+                        } else {
+                            conditions.remove(i);
+                            total--; i--;
+                        }
+                    } else {
+                        //and xand condition
+                        if (cond.constant) {
+                            conditions.remove(i);
+                            total--; i--;
+                        } else {
+                            return new Condition(false);
+                        }
                     }
-                } else if (cond.constant != null) {
-                    if ((this.operation.equals("&") || this.operation.equals("^&")) && !cond.constant) {
-                        //false term inside and operator, result is false
-                        return new Condition(false);
-                        //true term inside and operator is ignored
-                    } else if (this.operation.equals("|") && cond.constant) {
-                        //true term inside or operator, result is true
-                        return new Condition(true);
-                        //false term inside or operator is ignored
+                } else if (operation.equals(cond.operation)) {
+                    //collapse same operations
+                    conditions.remove(i);
+                    total--; i--;
+                    for(int j=0; j<cond.conditions.size(); j++) {
+                        conditions.add(cond.conditions.get(j));
+                        total++;
                     }
-
                 } else {
-                    conditions.add(c);
+                    //collapse, reevaluate if there's a change
+                    conditions.set(i, cond.collapse());
+                    if (cond != conditions.get(i)) {
+                        i--;
+                    }
                 }
             }
 
+            //consider the results after collapsing
             if (conditions.size() == 0) {
-                if (this.operation.equals("&") || this.operation.equals("^&")) {
-                    return new Condition(true);
-                } else if (this.operation.equals("|")) {
-                    return new Condition(false);
-                } else {
-                    return null;
-                }
+                return new Condition(!"|".equals(operation));
             } else if (conditions.size() == 1) {
                 return conditions.get(0);
             } else {
-                return new Condition(conditions, operation);
+                return this;
             }
         } else {
-            return deepCopy();
+            //do nothing
+            return this;
         }
+
     }
 
     public Condition complexRole2OrCondition() {
@@ -433,43 +731,32 @@ public class Condition {
     
     public Condition purgeOr() {
         if (this.conditions != null && "|".equals(this.operation)) {
-            List<Condition> conditions = this.conditions;
-            List<Condition> newConditions;
-            boolean changed = true;
 
-            while (changed) {
-                changed = false;
-
-                for (Condition cond1 : conditions) {
-                    newConditions = new ArrayList<>();
-                    newConditions.add(cond1.deepCopy());
-
-                    for (Condition cond2 : conditions) {
-                        if (cond1 != cond2) {
-                            if (cond2.implies(cond1)) {
-                                changed = true;
-                            } else {
-                                newConditions.add(cond2.deepCopy());
+            int total = this.conditions.size();
+            for (int i=0; i<total; i++) {
+                for (int j=0; j<total; j++) {
+                    if (i != j) {
+                        if (this.conditions.get(j).implies(this.conditions.get(i))) {
+                            this.conditions.remove(j);
+                            total--;
+                            if(j < i) {
+                                i--;
                             }
+                            j--;
                         }
-                    }
-
-                    if (changed) {
-                        conditions = newConditions;
-                        break;
                     }
                 }
             }
 
 
-
-            return new Condition(conditions, "|");
+            return this;
         } else {
             return deepCopy();
         }
     }
 
     public Condition canonicalForm() {
+        
         Condition current = collapse();
         current = current.complexRole2OrCondition();
         current = current.collapse();
@@ -515,7 +802,7 @@ public class Condition {
             out += restriction.toString().replaceAll("\n", "\n\t");
         }
         if (conditions != null) {
-            out += "Condition "+operation;
+            out += "Condition "+operation+" "+conditions.size();
             for (Condition cond : conditions) {
                 out += "\n\t" + cond.toString().replaceAll("\n", "\n\t");
             }

@@ -371,6 +371,7 @@ public class Expression {
         return collapse(false);
     }
 
+
     public Expression collapse(boolean allowMerge) {
         if (this.expressions != null) {
             ArrayList<Expression> expressions = new ArrayList<>();
@@ -393,21 +394,34 @@ public class Expression {
                         //false term inside or operator is ignored
                     }
 
-                } else if (allowMerge) {
-                    boolean merged = false;
-
-                    for (Expression e2 : expressions) {
-                        if (e2.draws == e.draws && e2.condition != null && e.condition != null) {
-                            e2.condition = new Condition(Arrays.asList(e2.condition, e.condition), this.operation).canonicalForm();
-                            merged = true;
-                        }
-                    }
-
-                    if (!merged) {
-                        expressions.add(e);
-                    }
                 } else {
                     expressions.add(e);
+                }
+            }
+
+            if (allowMerge) {
+                int total = expressions.size();
+                for (int i=0; i<total; i++) {
+                    if (expressions.get(i).condition != null ) {
+                        ArrayList<Condition> mergeable = new ArrayList<>();
+                        for (int j=0; j<total; j++) {
+                            if (i != j && expressions.get(i).draws == expressions.get(j).draws
+                                && expressions.get(j).condition != null
+                            ) {
+                                mergeable.add(expressions.get(j).condition);
+                                expressions.remove(j);
+                                total--;
+                                if (j < i) {
+                                    i--;
+                                }
+                                j--;
+                            }
+                        }
+                        if (!mergeable.isEmpty()) {
+                            mergeable.add(expressions.get(i).condition);
+                            expressions.get(i).condition = new Condition(mergeable, this.operation).canonicalForm();
+                        }
+                    }
                 }
             }
 
@@ -434,42 +448,34 @@ public class Expression {
 
     public Expression purge() {
         if (this.expressions != null) {
+
             List<Expression> expressions = new ArrayList<>();
 
             for (Expression expr1 : this.expressions) {
                 expressions.add(expr1.purge());
             }
 
-            List<Expression> newExpressions;
-            boolean changed = true;
+            int total = expressions.size();
 
-            while (changed) {
-                changed = false;
-
-                for (Expression expr1 : expressions) {
-                    newExpressions = new ArrayList<>();
-                    newExpressions.add(expr1.deepCopy());
-
-                    for (Expression expr2 : expressions) {
-                        if (expr1 != expr2) {
-                            if (
-                                "|".equals(this.operation) && expr2.implies(expr1)
-                                || "&".equals(this.operation) && expr1.implies(expr2)
-                            ) {
-                                changed = true;
-                            } else {
-                                newExpressions.add(expr2.deepCopy());
+            for (int i=0; i<total; i++) {
+                for (int j=0; j<total; j++) {
+                    if (i != j) {
+                        if (
+                            "|".equals(this.operation) && expressions.get(j).implies(expressions.get(i)) ||
+                            "&".equals(this.operation) && expressions.get(i).implies(expressions.get(j))
+                        ) {
+                            expressions.remove(j);
+                            total--;
+                            if(j < i) {
+                                i--;
                             }
+                            j--;
                         }
-                    }
-
-                    if (changed) {
-                        expressions = newExpressions;
-                        break;
                     }
                 }
             }
 
+            List<Expression> newExpressions;
             //Multidependancy & Compatibility
             if ("&".equals(this.operation)) {
                 newExpressions = new ArrayList<>();
@@ -699,7 +705,7 @@ public class Expression {
 
     public Expression canonicalConditions() {
         if (this.condition != null ) {
-            Condition cond = this.condition.canonicalForm();
+            Condition cond = this.condition.canonicalFormNode();
             if (cond.constant != null) {
                 return new Expression(cond.constant);
             } else {
