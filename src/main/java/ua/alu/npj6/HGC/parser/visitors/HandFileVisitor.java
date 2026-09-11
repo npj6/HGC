@@ -62,6 +62,6 @@ public class HandFileVisitor extends PredicateBaseVisitor<HandFile> {
             
         }
 
-        return new HandFile(names, expressions, texts);
+        return new HandFile(names, expressions, texts, new ArrayList<>());
     }
 }

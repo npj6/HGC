@@ -27,6 +27,8 @@ import ua.alu.npj6.HGC.utils.Timer;
 
 public class App {
 
+    //TO DO: redo symbolic manipulation (consider shortForm for efficiency), clean and test
+
     static final long HANDS_N = 10000000L; //diez millones
 
     public static void main(String[] args) {
@@ -89,20 +91,23 @@ public class App {
                 System.out.println(name+": "+text);
                 System.out.println("HAND SIZE: " + expr.getDraws());
                 System.out.println();
-                calculateHand(expr, decklist, strat);
+                calculateHand(parser, name, decklist, strat);
             }
         }
     }
 
-    private static void calculateHand(Expression expr, Decklist decklist, Strategy strat) {
+    private static void calculateHand(HGCParser parser, String name, Decklist decklist, Strategy strat) {
+        Expression expr = parser.getExpression(name);
         int HAND_SIZE = expr.getDraws();
-        Supplier<BiPredicate<Decklist, int[]>> checkSupplier = expr.getPredicate(decklist);
+        Supplier<BiPredicate<Decklist, int[]>> checkSupplier = parser.getPredicate(decklist, name);
 
         int hand[] = new int[HAND_SIZE];
         long total = 0;
         ConcurrentShuffler shuffler = new ConcurrentShuffler();
 
-        total = Timer.time(() -> shuffler.shuffleDrawAndCheck(decklist, HAND_SIZE, checkSupplier, HANDS_N, strat), "hand");
+        total = Timer.time(() -> shuffler.shuffleDrawAndCheck(decklist, HAND_SIZE, checkSupplier, HANDS_N, strat), "");
+        System.out.println("Probability : "+100*total/(double) HANDS_N+"%");
+        System.out.println();
     }
 
     private static double estimateError(long hands) {

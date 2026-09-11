@@ -56,6 +56,62 @@ public class Condition {
 
     }
 
+    ArrayList<Role> splitIntoGroups(ArrayList<Role> groups, Role role) {
+        for(int i=0; i<groups.size(); i++) {
+            Role r = groups.get(i);
+            Role common = r.common(role);
+            //ignore independent roles
+            if (!common.indexes.isEmpty()) {
+                if (common.indexes.size() < r.indexes.size()) {
+                    //group r needs to be broken up
+                    groups.remove(i);
+                    groups.add(common);
+                    groups.add(r.subtract(common));
+                    return splitIntoGroups(groups, role);
+                } else if (common.indexes.size() < role.indexes.size()) {
+                    //role needs to be broken up
+                    role = role.subtract(common);
+                } else {
+                    //match found, grouping is ok
+                    return groups;
+                }
+            }
+        }
+
+        //if code reaches this point, all idx in role are absent from any group
+        groups.add(role.deepCopy());
+        return groups;
+    }
+
+    ArrayList<Role> getRoleGroups(ArrayList<Role> groups) {
+        if (this.restriction != null) {
+            groups = splitIntoGroups(groups, this.restriction.role);
+        } else if (this.conditions != null) {
+            for (Condition c : this.conditions) {
+                groups = c.getRoleGroups(groups);
+            }
+        }
+        return groups;
+    }
+
+    Condition groupRoles(ArrayList<Role> groups) {
+        if (this.restriction != null) {
+            ArrayList<Integer> newRoles = new ArrayList<>();
+            for (int i=0; i<groups.size(); i++) {
+                //we already split the groups, if the first element is contained all elements are
+                if (this.restriction.role.indexes.contains(groups.get(i).indexes.get(0))) {
+                    newRoles.add(i);
+                }
+            }
+            this.restriction.role = new Role(newRoles);
+        } else if (this.conditions != null) {
+            for(int i=0; i<this.conditions.size(); i++) {
+                this.conditions.set(i, this.conditions.get(i).groupRoles(groups));
+            }
+        }
+        return this;
+    }
+
     //use only after canonical form
     List<Integer> relevantIndexes() {
         if (this.restriction != null) {
@@ -121,15 +177,35 @@ public class Condition {
         return this.operation;
     }
 
-    static public Timer extractOrTimer = null;
+    public Condition orderByRestriction() {
+        if (this.conditions != null) {
+            //c2.size - c1.size
+            this.conditions.sort( (Condition c1, Condition c2) -> {
+                if (c1.conditions != null && c2.conditions != null) {
+                    return c2.conditions.size() - c1.conditions.size();
+                } else if (c1.restriction != null && c2.restriction != null) {
+                    if (c1.restriction.exact == c2.restriction.exact) {
+                        return c1.restriction.quantity - c2.restriction.quantity;
+                    } else {
+                        return (c1.restriction.exact ? 1 : -1);
+                    }
+                } else {
+                    return (c1.conditions != null ? -1 : 1);
+                }
+            });
+        }
+        return this;
+    }
 
     //only recursive function in the node pipeline
     public Condition canonicalFormNode() {
         if (restriction != null) {
             Condition c = restriction.complexRole2OrCondition();
+            
             if (c.conditions != null) {
                 c = c.canonicalFormNode();
             }
+
             return c;
         } else if (conditions != null) {
             ArrayList<Condition> newConditions = new ArrayList<>();
@@ -140,19 +216,14 @@ public class Condition {
             //deletes constants
             Condition current = new Condition(newConditions, operation).collapseNode();
 
-
             //leaf nodes
             if (current.constant != null || current.restriction != null) {
                 return current;
             }
-
-            Condition current2 = current;
-
-            current =
-                extractOrTimer == null ?
-                current.extractOrNode() :
-                extractOrTimer.timeAcc(() -> current2.extractOrNode());
             
+            current.orderByRestriction();
+
+            current = current.extractOrNode();
 
             return current;
 
@@ -292,7 +363,6 @@ public class Condition {
 
     public static Timer impliesTimer = null;
     public static Timer depsTimer = null;
-    public static Timer firstHalfTimer = null;
     //assumes condition has been collapsed (+ collapsed assumptions), may modify this
     public Condition extractOrNode() {
         if (this.conditions == null || this.pure && "&".equals(this.operation)) {
@@ -791,13 +861,17 @@ public class Condition {
             return new Condition(conditions, this.operation);
         } else if (this.restriction != null) {
             int idx = this.restriction.role.indexes.get(0);
-            if (idx < 0) {
+            if (parserContext.roleGroups.get(idx).indexes.stream().allMatch((e) -> e < 0)) {
                 if (this.restriction.exact && this.restriction.quantity == 0) {
                     return new Condition(true); //exactly 0 of non existent? no prob bob.
                 } else {
                     return new Condition(false);
                 }
-            } else if (parserContext.decklist.quantities[idx] < this.restriction.quantity) {
+            } else if (
+                parserContext.roleGroups.get(idx).indexes.stream()
+                    .mapToInt(r -> parserContext.decklist.quantities[r])
+                    .reduce(0, Integer::sum) < this.restriction.quantity
+                ) {
                 return new Condition(false);
             } else {
                 return deepCopy();

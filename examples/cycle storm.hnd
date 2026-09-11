@@ -18,11 +18,11 @@
 // Barren Moor can only count as a Land or a Cycler
 // Last line enforces between 2 and 4 cyclers 
 
-//"GOOD_HAND" = ("LANDS"x2 ^& "CYCLERS"x2
-//    ^& ("MANA" | "CYCLERS")
-//    ^& ("DRAW" | "CYCLERS")
-//    ^& ("COMBO" | "CYCLERS"))
-//    & ("CYCLERS"!x2 | "CYCLERS"!x3 | "CYCLERS"!x4 ) @7;
+"GOOD_HAND" = ("LANDS"x2 ^& "CYCLERS"x2
+    ^& ("MANA" | "CYCLERS")
+    ^& ("DRAW" | "CYCLERS")
+    ^& ("COMBO" | "CYCLERS"))
+    & ("CYCLERS"!x2 | "CYCLERS"!x3 | "CYCLERS"!x4 ) @7;
 
 // Condition definition, & does not exclude common cards
 // 3 Barren Moor and 2 Street Wraith would satisfy it
@@ -31,13 +31,13 @@
 COND "OK_HAND" = "LANDS"x2 & "CYCLERS"x5;
 
 "OK_STARTING_HAND" = COND"OK_HAND" @ 7;
-//"OK_FIRST_MULLIGAN" = COND"OK_HAND" @ 6;
-//"OK_SECOND_MULLIGAN" = COND"OK_HAND" @ 5;
+"OK_FIRST_MULLIGAN" = COND"OK_HAND" @ 6;
+"OK_SECOND_MULLIGAN" = COND"OK_HAND" @ 5;
 
-//COND "FRINGE_HAND" = "LANDS"x1 & "CYCLERS"x4;
+COND "FRINGE_HAND" = "LANDS"x1 & "CYCLERS"x4;
 
-//"FRINGE_FIRST_MULLIGAN" = COND"FRINGE_HAND" @ 6;
-//"FRINGE_SECOND_MULLIGAN" = COND"FRINGE_HAND" @ 5;
+"FRINGE_FIRST_MULLIGAN" = COND"FRINGE_HAND" @ 6;
+"FRINGE_SECOND_MULLIGAN" = COND"FRINGE_HAND" @ 5;
 
 // Mixed hand, either of the hands satisfy it
-//"GOOD_KEEP" = HAND "GOOD_HAND" | HAND "OK_STARTING_HAND";
+"GOOD_KEEP" = HAND "GOOD_HAND" | HAND "OK_STARTING_HAND";

@@ -18,6 +18,8 @@ public class ParserContext {
     public ArrayList<String> missingCondNames;
     public ArrayList<String> missingExprNames;
 
+    public ArrayList<Role> roleGroups;
+
     public Decklist decklist;
 
     public ParserContext(Decklist decklist) {

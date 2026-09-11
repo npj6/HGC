@@ -20,6 +20,9 @@ import org.antlr.v4.runtime.RecognitionException;
 
 import ua.alu.npj6.HGC.Decklist;
 
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
+
 import ua.alu.npj6.HGC.utils.Timer;
 
 public class HGCParser {
@@ -41,6 +44,10 @@ public class HGCParser {
 
     public List<String> getNames() {
         return optimizedHandFile.names;
+    }
+
+    public Supplier<BiPredicate<Decklist, int[]>> getPredicate(Decklist decklist, String name) {
+        return optimizedHandFile.getPredicate(decklist, name);
     }
 
     public HGCParser(String handfile, Decklist decklist) {

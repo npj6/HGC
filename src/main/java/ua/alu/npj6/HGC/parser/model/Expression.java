@@ -25,6 +25,33 @@ public class Expression {
 
     Boolean constant = null;
 
+    ArrayList<Role> getRoleGroups() {
+        ArrayList<Role> groups = new ArrayList<>();
+        return getRoleGroups(groups);
+    }
+
+    ArrayList<Role> getRoleGroups(ArrayList<Role> groups) {
+        if (this.condition != null) {
+            groups = this.condition.getRoleGroups(groups);
+        } else if (this.expressions != null) {
+            for (Expression e : this.expressions) {
+                groups = e.getRoleGroups(groups);
+            }
+        }
+        return groups;
+    }
+
+    Expression groupRoles(ArrayList<Role> groups) {
+        if (this.condition != null) {
+            this.condition = this.condition.groupRoles(groups);
+        } else if (this.expressions != null) {
+            for (int i=0; i<this.expressions.size(); i++) {
+                this.expressions.set(i, this.expressions.get(i).groupRoles(groups));
+            }
+        }
+        return this;
+    }
+
     Restriction[][][][] shortForm(List<Integer> relevantIndexes) {
         if (this.condition != null) {
             Restriction[][][] shortForms = new Restriction[][][]{this.condition.shortForm(relevantIndexes)};
@@ -121,7 +148,7 @@ public class Expression {
     }
 
     //use only after canonical form
-    public Supplier<BiPredicate<Decklist, int[]>> getPredicate(Decklist decklist) {
+    public Supplier<BiPredicate<Decklist, int[]>> getPredicate(Decklist decklist, ArrayList<Role> roleGroups) {
         if (this.constant != null) {
             return () -> (Decklist dList, int[] hand) -> this.constant;
         } else {
@@ -131,8 +158,15 @@ public class Expression {
             //returns the short array idx for each card, -1 means not relevant
             int indexes[] = new int[decklist.names.length];
             for(int i=0; i<indexes.length; i++) {
-                int idx = relevantIndexes.indexOf(i);
-                indexes[i] = idx;
+                int idx = -1;
+                for(int j=0; j<roleGroups.size(); j++) {
+                    if (roleGroups.get(j).indexes.contains(i)) {
+                        idx = j;
+                        break;
+                    }
+                }
+                //there should be no -1 in relevantIndexes
+                indexes[i] = relevantIndexes.indexOf(idx);
             }
 
             //Array (Expr |) of array (Expr &) of array (Cond |) of array (Cond &) of clean restrictions
@@ -628,23 +662,29 @@ public class Expression {
         }
     }
 
+    static boolean TOP_NODE = true;
     public Expression canonicalForm() {
-        
-        Condition.depsTimer = new Timer("removeDeps");
-        Condition.extractOrTimer = new Timer("extractOr");
-        Condition.firstHalfTimer = new Timer("implies timer");
-        Condition.impliesTimer = new Timer("implies");
+        boolean top_node = false;
+        if (TOP_NODE) {
+            Condition.depsTimer = new Timer("removeDeps");
+            Condition.impliesTimer = new Timer("implies");
+            TOP_NODE = false;
+            top_node = true;
+        }
 
-        Expression current = Timer.time(() -> canonicalConditions(), "canonical conditions");
+        Expression current = (top_node ?
+            Timer.time(() -> canonicalConditions(), "canonical conditions") :
+            canonicalConditions()
+        );
         
-        Condition.depsTimer.show();
-        Condition.depsTimer = null;
-        Condition.extractOrTimer.show();
-        Condition.extractOrTimer = null;
-        Condition.firstHalfTimer.show();
-        Condition.firstHalfTimer = null;
-        Condition.impliesTimer.show();
-        Condition.impliesTimer = null;
+        if (top_node) {
+            Condition.depsTimer.show();
+            Condition.depsTimer = null;
+            Condition.impliesTimer.show();
+            Condition.impliesTimer = null;
+            top_node = false;
+            TOP_NODE = true;
+        }
 
         current = current.condition2Expression(); //Fernando Deinller
         current = current.collapse();

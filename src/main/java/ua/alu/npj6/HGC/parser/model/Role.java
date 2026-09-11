@@ -30,6 +30,26 @@ public class Role {
         return new Role(indexes);
     }
 
+    Role common(Role r2) {
+        ArrayList<Integer> common = new ArrayList<>();
+        for (Integer idx1 : this.indexes) {
+            if (r2.indexes.contains(idx1)) {
+                common.add(idx1);
+            }
+        }
+        return new Role(common);
+    }
+
+    Role subtract(Role r2) {
+        ArrayList<Integer> subtract = new ArrayList<>();
+        for (Integer idx1 : this.indexes) {
+            if (!r2.indexes.contains(idx1)) {
+                subtract.add(idx1);
+            }
+        }
+        return new Role(subtract);
+    }
+
     public boolean implies(Role that) {
         for(Integer i2 : that.indexes) {
             boolean found = false;

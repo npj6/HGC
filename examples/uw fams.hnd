@@ -1,0 +1,11 @@
+//Role definitions, parenthesis are mandatory
+
+"NOT_BOUNCE_LAND" = ("Ash Barrens" | "Contaminated Landscape" | "Idyllic Beachfront" | "Island" | "Mortuary Mire" | "Plains");
+
+//Hand definitions
+
+"ON_THE_PLAY" = "NOT_BOUNCE_LAND" & "Azorius Chancery" & "Sunscape Familiar" & "Snap"
+    & ("Mulldrifter" | "Archaeomancer") & "God-Pharaoh's Faithful" & ("Preordain" | "Ephemerate") @7;
+
+"ON_THE_DRAW" = "Island" & "Plains" & "Preordain" & "God-Pharaoh's Faithful" & "Sunscape Familiar"
+    & "Negate" & "Mulldrifter" @7;
