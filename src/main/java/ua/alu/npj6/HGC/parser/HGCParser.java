@@ -20,6 +20,8 @@ import org.antlr.v4.runtime.RecognitionException;
 
 import ua.alu.npj6.HGC.Decklist;
 
+import ua.alu.npj6.HGC.utils.Timer;
+
 public class HGCParser {
 
     public boolean successful = true;
@@ -65,8 +67,14 @@ public class HGCParser {
             return;
         }
 
-        handFile = handFile.canonicalForm();
-        optimizedHandFile = handFile.optimize(parserContext);
+        
+
+        handFile = Timer.time(() -> handFile.canonicalForm(), "canonical form");
+        
+
+        optimizedHandFile = Timer.time(() ->handFile.optimize(parserContext), "optimize");
+        
+        
     }
 
     public static class ThrowingErrorListener extends BaseErrorListener {

@@ -11,6 +11,8 @@ import java.util.Comparator;
 
 import ua.alu.npj6.HGC.Decklist;
 
+import ua.alu.npj6.HGC.utils.Timer;
+
 public class Expression {
     Condition condition = null;
 
@@ -627,7 +629,23 @@ public class Expression {
     }
 
     public Expression canonicalForm() {
-        Expression current = canonicalConditions();
+        
+        Condition.depsTimer = new Timer("removeDeps");
+        Condition.extractOrTimer = new Timer("extractOr");
+        Condition.firstHalfTimer = new Timer("implies timer");
+        Condition.impliesTimer = new Timer("implies");
+
+        Expression current = Timer.time(() -> canonicalConditions(), "canonical conditions");
+        
+        Condition.depsTimer.show();
+        Condition.depsTimer = null;
+        Condition.extractOrTimer.show();
+        Condition.extractOrTimer = null;
+        Condition.firstHalfTimer.show();
+        Condition.firstHalfTimer = null;
+        Condition.impliesTimer.show();
+        Condition.impliesTimer = null;
+
         current = current.condition2Expression(); //Fernando Deinller
         current = current.collapse();
         current = current.extractOr();

@@ -6,6 +6,8 @@ import java.util.Arrays;
 
 import java.util.Collections;
 
+import ua.alu.npj6.HGC.utils.Timer;
+
 public class Condition {
     Boolean constant = null;
 
@@ -119,6 +121,8 @@ public class Condition {
         return this.operation;
     }
 
+    static public Timer extractOrTimer = null;
+
     //only recursive function in the node pipeline
     public Condition canonicalFormNode() {
         if (restriction != null) {
@@ -142,7 +146,12 @@ public class Condition {
                 return current;
             }
 
-            current = current.extractOrNode();
+            Condition current2 = current;
+
+            current =
+                extractOrTimer == null ?
+                current.extractOrNode() :
+                extractOrTimer.timeAcc(() -> current2.extractOrNode());
             
 
             return current;
@@ -281,6 +290,9 @@ public class Condition {
 
     }
 
+    public static Timer impliesTimer = null;
+    public static Timer depsTimer = null;
+    public static Timer firstHalfTimer = null;
     //assumes condition has been collapsed (+ collapsed assumptions), may modify this
     public Condition extractOrNode() {
         if (this.conditions == null || this.pure && "&".equals(this.operation)) {
@@ -288,11 +300,12 @@ public class Condition {
             return this;
         } else if ("|".equals(this.operation)) {
             //check dependancy in |
-            return this.removeDepsOr();
+            return depsTimer.timeAcc(() -> this.removeDepsOr());
         } else {
             //every subcondition is simple, an | or a pure &
             
             //combine all simple and pure & conditions
+        
             Condition pureAnd = new Condition(Collections.emptyList(), "&");
             for (Condition c : this.conditions) {
                 if (!"|".equals(c.operation)) {
@@ -321,8 +334,8 @@ public class Condition {
                     
                     while (0 < total) {
                         total--;
-                        pureAnd = conditions.get(total);
-                        conditions.remove(total);
+                        pureAnd = conditions.get(0);
+                        conditions.remove(0);
 
                         //tries to combine each subSubCond with the pureAnds
                         for (Condition subSubCond : c.conditions) {
@@ -339,14 +352,14 @@ public class Condition {
                             if (!Boolean.FALSE.equals(subSubCond.constant)) {
                                 //check independance from the others subSubConds
                                 boolean independent = true;
-                                int newTotal = conditions.size();
-                                for (int i=total; i<newTotal; i++) {
+                                for (int i=total; i<conditions.size(); i++) {
                                     Condition other = conditions.get(i);
-                                    if (other.implies(subSubCond)) {
+                                    Condition subSubCond2 = subSubCond;
+                                    if (impliesTimer.timeAcc(() -> other.implies(subSubCond2))) {
                                         //remove redundant conditions
                                         conditions.remove(i);
-                                        i--; newTotal--;
-                                    } else if (subSubCond.implies(other)) {
+                                        i--;
+                                    } else if (impliesTimer.timeAcc(() -> subSubCond2.implies(other))) {
                                         independent = false;
                                         break;
                                     }

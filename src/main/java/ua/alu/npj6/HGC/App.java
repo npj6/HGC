@@ -23,10 +23,11 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import ua.alu.npj6.HGC.utils.Timer;
+
 public class App {
 
     static final long HANDS_N = 10000000L; //diez millones
-    static final double MEASURE = 1000000.0; //ms
 
     public static void main(String[] args) {
 
@@ -51,16 +52,11 @@ public class App {
         }
 
         File file = new File(ns.getString("deckFile"));
-        Decklist decklist = new Decklist(file);
-        long startTime, endTime, duration;
 
-        startTime = System.nanoTime();
-            HGCParser parser = new HGCParser(ns.getString("handFile"), decklist);
-        endTime = System.nanoTime();
-            
-        duration = (endTime - startTime);
-        System.out.println("Duration: "+duration/MEASURE+" ms");
-        System.out.println();
+        Decklist decklist = new Decklist(file);
+        String handFileName = ns.getString("handFile");
+        
+        HGCParser parser = Timer.time(() -> new HGCParser(handFileName, decklist), "total parse");
 
         if (!parser.successful) {
             System.out.println("Parsing unsuccessful");
@@ -104,17 +100,9 @@ public class App {
 
         int hand[] = new int[HAND_SIZE];
         long total = 0;
-        long startTime, endTime, duration;
         ConcurrentShuffler shuffler = new ConcurrentShuffler();
 
-        startTime = System.nanoTime();
-            total = shuffler.shuffleDrawAndCheck(decklist, HAND_SIZE, checkSupplier, HANDS_N, strat);
-        endTime = System.nanoTime();
-            
-        duration = (endTime - startTime);
-        System.out.println("Duration: "+duration/MEASURE+" ms");
-        System.out.println("Probability: "+100*total/(double) HANDS_N+"%");
-        System.out.println();
+        total = Timer.time(() -> shuffler.shuffleDrawAndCheck(decklist, HAND_SIZE, checkSupplier, HANDS_N, strat), "hand");
     }
 
     private static double estimateError(long hands) {
