@@ -3,7 +3,7 @@ Game agnostic hand probability calculator. Monte Carlo method. Define a set of h
 
 Still half-baked, output includes test prints and some hand definitions could take unreasonable amounts of compute time.
 
-`mvn clean verify` and `hgc -dF DECKFILE -dH HANDFILE` to estimate the probabilities of all hands in HANDFILE based on the DECKFILE list. Check out the examples folder. You may use `--hands HANDNAME1 HANDNAME2 ...` to calculate only some hands. HANDNAMEs should not include double quotes.
+`mvn clean verify` and `hgc -dF DECKFILE -hF HANDFILE` to estimate the probabilities of all hands in HANDFILE based on the DECKFILE list. Check out the examples folder. You may use `--hands HANDNAME1 HANDNAME2 ...` to calculate only some hands. HANDNAMEs should not include double quotes.
 
 ## Hand File
 All names in the hand file need to be enclosed in double quotes and are case sensitive. Spaces, tabs and new lines are ignored (unless in between double quotes). Use `//` to start line comments. Every statement in the hand file should end with a semicolon. Every statement in the hand file must be either a named role, a named condition or a named expression.
